@@ -8,13 +8,12 @@
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
+    <meta name="theme-color" content="#ff3344">
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
-    <!-- Dynamic CSS Loading for Cache Busting -->
-    <script>
-        document.write('<link rel="stylesheet" href="css/style.css?v=' + new Date().getTime() + '">');
-    </script>
+    <!-- CSS with Versioning -->
+    <link rel="stylesheet" href="css/style.css?v=2.1">
 </head>
 <body>
     <!-- Background Ambient Effects -->
@@ -23,8 +22,47 @@
         <div class="glow-orb orb-2"></div>
     </div>
 
+    <!-- Login Screen -->
+    <div id="loginScreen" class="login-overlay">
+        <div class="login-card glass-card">
+            <div class="login-header">
+                <div class="brand-logo-large">O</div>
+                <h1>OLIVIA <span>2.0</span></h1>
+                <p>Authorized Personnel Only</p>
+            </div>
+            <div class="login-form">
+                <div class="input-group">
+                    <i class="fa-solid fa-lock"></i>
+                    <input type="password" id="accessKey" placeholder="Access Key">
+                </div>
+                <button class="login-btn" onclick="handleLogin()">
+                    <span>Initialize System</span>
+                    <i class="fa-solid fa-power-off"></i>
+                </button>
+            </div>
+            <div class="login-footer">
+                <p>&copy; 2026 69 STUDIO - Dubai Branch</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Mobile Top Bar -->
+    <header class="mobile-top-bar" id="mobileTopBar" style="display: none;">
+        <div class="mobile-brand">
+            <div class="brand-logo-sm">O</div>
+            <h3>OLIVIA <span>2.0</span></h3>
+        </div>
+        <div class="mobile-header-right">
+            <div class="mobile-status-dot"></div>
+            <button class="icon-btn" id="mobileSidebarBtn"><i class="fa-solid fa-bars"></i></button>
+        </div>
+    </header>
+
+    <!-- Sidebar Overlay (mobile backdrop) -->
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
     <!-- Main Container -->
-    <div class="app-container">
+    <div class="app-container" id="appContainer" style="display: none;">
         
         <!-- Sidebar -->
         <nav class="sidebar">
@@ -37,26 +75,14 @@
             </div>
             
             <ul class="nav-links">
-                <li class="nav-item active" data-target="dashboard">
-                    <i class="fa-solid fa-border-all"></i>
-                    <span>Dashboard</span>
-                </li>
-                <li class="nav-item" data-target="chat">
-                    <i class="fa-solid fa-message"></i>
-                    <span>Comms</span>
-                </li>
-                <li class="nav-item" data-target="studio">
-                    <i class="fa-solid fa-camera"></i>
-                    <span>69 Studio</span>
-                </li>
-                <li class="nav-item" data-target="smarthome">
-                    <i class="fa-solid fa-house-signal"></i>
-                    <span>Smart Home</span>
-                </li>
-                <li class="nav-item" data-target="intel">
-                    <i class="fa-solid fa-brain"></i>
-                    <span>Intel</span>
-                </li>
+                <li class="nav-item active" data-target="dashboard"><i class="fa-solid fa-border-all"></i><span>Dashboard</span></li>
+                <li class="nav-item" data-target="chat"><i class="fa-solid fa-message"></i><span>Comms</span></li>
+                <li class="nav-item" data-target="studio"><i class="fa-solid fa-camera"></i><span>69 Studio</span></li>
+                <li class="nav-item" data-target="smarthome"><i class="fa-solid fa-house-signal"></i><span>Smart Home</span></li>
+                <li class="nav-item" data-target="finance"><i class="fa-solid fa-wallet"></i><span>Finance</span></li>
+                <li class="nav-item" data-target="security"><i class="fa-solid fa-shield-halved"></i><span>Security</span></li>
+                <li class="nav-item" data-target="schedule"><i class="fa-solid fa-calendar-days"></i><span>Schedule</span></li>
+                <li class="nav-item" data-target="intel"><i class="fa-solid fa-brain"></i><span>Intel</span></li>
             </ul>
             
             <div class="user-profile">
@@ -108,26 +134,14 @@
 
                     <!-- Quick Action Cards -->
                     <div class="quick-actions">
-                        <div class="glass-card action-card" onclick="triggerAction('spotify')">
-                            <i class="fa-brands fa-spotify spotify-color"></i>
-                            <h4>Play Focus Music</h4>
-                            <p>Deep work playlist</p>
-                        </div>
-                        <div class="glass-card action-card" onclick="triggerAction('work_mode')">
-                            <i class="fa-solid fa-code"></i>
-                            <h4>Dev Mode</h4>
-                            <p>Launch IDE & Tools</p>
-                        </div>
-                        <div class="glass-card action-card">
-                            <i class="fa-solid fa-camera"></i>
-                            <h4>New Booking</h4>
-                            <p>69 Studio Client</p>
-                        </div>
-                        <div class="glass-card action-card">
-                            <i class="fa-solid fa-lightbulb text-yellow"></i>
-                            <h4>Studio Lights</h4>
-                            <p>Toggle ON/OFF</p>
-                        </div>
+                        <div class="glass-card action-card" onclick="triggerAction('spotify')"><i class="fa-brands fa-spotify spotify-color"></i><h4>Focus Music</h4><p>Deep work playlist</p></div>
+                        <div class="glass-card action-card" onclick="triggerAction('work_mode')"><i class="fa-solid fa-code"></i><h4>Dev Mode</h4><p>Launch IDE &amp; Tools</p></div>
+                        <div class="glass-card action-card" onclick="switchToView('studio')"><i class="fa-solid fa-camera"></i><h4>New Booking</h4><p>69 Studio Client</p></div>
+                        <div class="glass-card action-card" onclick="triggerAction('studio_lights')"><i class="fa-solid fa-lightbulb text-yellow"></i><h4>Studio Lights</h4><p>Toggle ON/OFF</p></div>
+                        <div class="glass-card action-card" onclick="triggerAction('morning_brief')"><i class="fa-solid fa-sun text-yellow"></i><h4>Morning Brief</h4><p>News &amp; Schedule</p></div>
+                        <div class="glass-card action-card" onclick="triggerAction('night_lockdown')"><i class="fa-solid fa-moon" style="color:#818cf8"></i><h4>Night Mode</h4><p>Lock &amp; dim all</p></div>
+                        <div class="glass-card action-card" onclick="switchToView('finance')"><i class="fa-solid fa-chart-line" style="color:#10b981"></i><h4>Revenue</h4><p>Today's earnings</p></div>
+                        <div class="glass-card action-card" onclick="triggerAction('pc_shutdown')" style="border-color:var(--primary)"><i class="fa-solid fa-power-off" style="color:var(--primary)"></i><h4>Kill Switch</h4><p>Remote PC shutdown</p></div>
                     </div>
                 </div>
 
@@ -220,30 +234,14 @@
                         <!-- Physical Devices -->
                         <div class="glass-card intel-section">
                             <h3><i class="fa-solid fa-plug"></i> Connected Hardware</h3>
-                            
-                            <div class="setting-item">
-                                <div class="setting-info">
-                                    <h4>Front Door Lock</h4>
-                                    <p>Main entrance security</p>
-                                </div>
-                                <div class="cyber-toggle active" onclick="this.classList.toggle('active')"></div>
-                            </div>
-                            
-                            <div class="setting-item">
-                                <div class="setting-info">
-                                    <h4>CCTV Cameras</h4>
-                                    <p>Motion detection enabled</p>
-                                </div>
-                                <div class="cyber-toggle active" onclick="this.classList.toggle('active')"></div>
-                            </div>
-
-                            <div class="setting-item">
-                                <div class="setting-info">
-                                    <h4>Living Room TV</h4>
-                                    <p>Currently playing: Netflix</p>
-                                </div>
-                                <div class="cyber-toggle" onclick="this.classList.toggle('active')"></div>
-                            </div>
+                            <div class="setting-item"><div class="setting-info"><h4>Front Door Lock</h4><p>Main entrance security</p></div><div class="cyber-toggle active" onclick="this.classList.toggle('active')"></div></div>
+                            <div class="setting-item"><div class="setting-info"><h4>CCTV Cameras</h4><p>Motion detection enabled</p></div><div class="cyber-toggle active" onclick="this.classList.toggle('active')"></div></div>
+                            <div class="setting-item"><div class="setting-info"><h4>Living Room TV</h4><p>Currently: Netflix</p></div><div class="cyber-toggle" onclick="this.classList.toggle('active')"></div></div>
+                            <div class="setting-item"><div class="setting-info"><h4>Studio Main Lights</h4><p>69 Studio — 3 bulbs</p></div><div class="cyber-toggle active" onclick="this.classList.toggle('active')"></div></div>
+                            <div class="setting-item"><div class="setting-info"><h4>Garden Lights</h4><p>Outdoor perimeter</p></div><div class="cyber-toggle" onclick="this.classList.toggle('active')"></div></div>
+                            <div class="setting-item"><div class="setting-info"><h4>Wi-Fi Router</h4><p>Uptime: 14d 6h</p></div><div class="cyber-toggle active" onclick="this.classList.toggle('active')"></div></div>
+                            <div class="setting-item"><div class="setting-info"><h4>Smart Speaker</h4><p>HomePod — Living Room</p></div><div class="cyber-toggle active" onclick="this.classList.toggle('active')"></div></div>
+                            <div class="setting-item"><div class="setting-info"><h4>AC — Bedroom</h4><p>Set to 22°C, Auto mode</p></div><div class="cyber-toggle active" onclick="this.classList.toggle('active')"></div></div>
                         </div>
 
                         <!-- Environmental Controls -->
@@ -390,19 +388,118 @@
                     </div>
                 </div>
 
+                <!-- ===== FINANCE VIEW ===== -->
+                <div class="view" id="finance-view">
+                    <div class="studio-header">
+                        <h2><i class="fa-solid fa-wallet" style="color:var(--accent-green)"></i> Financial Intelligence</h2>
+                        <button class="btn-primary"><i class="fa-solid fa-plus"></i> Log Expense</button>
+                    </div>
+                    <div class="finance-kpi-grid">
+                        <div class="glass-card kpi-card"><div class="kpi-icon" style="background:rgba(16,185,129,0.15)"><i class="fa-solid fa-arrow-trend-up" style="color:#10b981"></i></div><div class="kpi-body"><span class="kpi-label">Today's Revenue</span><span class="kpi-value" style="color:#10b981">LKR 45,000</span><span class="kpi-trend up">↑ 12% vs yesterday</span></div></div>
+                        <div class="glass-card kpi-card"><div class="kpi-icon" style="background:rgba(14,165,233,0.15)"><i class="fa-solid fa-calendar-week" style="color:var(--accent-blue)"></i></div><div class="kpi-body"><span class="kpi-label">This Week</span><span class="kpi-value" style="color:var(--accent-blue)">LKR 280,000</span><span class="kpi-trend up">↑ 8% vs last week</span></div></div>
+                        <div class="glass-card kpi-card"><div class="kpi-icon" style="background:rgba(245,158,11,0.15)"><i class="fa-solid fa-calendar-check" style="color:#f59e0b"></i></div><div class="kpi-body"><span class="kpi-label">This Month</span><span class="kpi-value" style="color:#f59e0b">LKR 1.2M</span><span class="kpi-trend down">↓ 3% vs last month</span></div></div>
+                        <div class="glass-card kpi-card"><div class="kpi-icon" style="background:rgba(129,140,248,0.15)"><i class="fa-solid fa-piggy-bank" style="color:#818cf8"></i></div><div class="kpi-body"><span class="kpi-label">Net Savings</span><span class="kpi-value" style="color:#818cf8">LKR 380,000</span><span class="kpi-trend up">↑ 22% this month</span></div></div>
+                    </div>
+                    <div class="glass-card table-container" style="margin-top:20px">
+                        <h3 style="padding:15px 15px 5px;font-size:1rem;color:var(--text-muted)">Recent Transactions</h3>
+                        <table class="modern-table">
+                            <thead><tr><th>Description</th><th>Category</th><th>Amount</th><th>Status</th></tr></thead>
+                            <tbody>
+                                <tr><td>Wedding Package — Nimal</td><td>Studio</td><td style="color:#10b981">+LKR 85,000</td><td><span class="badge confirmed">Received</span></td></tr>
+                                <tr><td>Adobe CC Subscription</td><td>Software</td><td style="color:var(--primary)">-LKR 4,500</td><td><span class="badge pending">Auto-debit</span></td></tr>
+                                <tr><td>Fashion Shoot — Kasun</td><td>Studio</td><td style="color:#10b981">+LKR 35,000</td><td><span class="badge confirmed">Received</span></td></tr>
+                                <tr><td>Server Hosting (Oracle)</td><td>Cloud</td><td style="color:var(--primary)">-LKR 2,200</td><td><span class="badge confirmed">Paid</span></td></tr>
+                                <tr><td>Portrait Session</td><td>Studio</td><td style="color:#10b981">+LKR 18,000</td><td><span class="badge pending">Pending</span></td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- ===== SECURITY VIEW ===== -->
+                <div class="view" id="security-view">
+                    <div class="studio-header">
+                        <h2><i class="fa-solid fa-shield-halved" style="color:var(--primary)"></i> Security Center</h2>
+                        <button class="btn-primary" onclick="triggerAction('night_lockdown')"><i class="fa-solid fa-lock"></i> Lockdown All</button>
+                    </div>
+                    <div class="cctv-grid">
+                        <div class="glass-card cctv-feed"><div class="cctv-label"><span class="cctv-dot"></span> CAM 1 — Front Door</div><div class="cctv-placeholder"><i class="fa-solid fa-video"></i><span>Live Feed</span></div></div>
+                        <div class="glass-card cctv-feed"><div class="cctv-label"><span class="cctv-dot"></span> CAM 2 — Studio</div><div class="cctv-placeholder"><i class="fa-solid fa-video"></i><span>Live Feed</span></div></div>
+                        <div class="glass-card cctv-feed"><div class="cctv-label offline"><span class="cctv-dot offline"></span> CAM 3 — Garage</div><div class="cctv-placeholder offline"><i class="fa-solid fa-video-slash"></i><span>Offline</span></div></div>
+                        <div class="glass-card cctv-feed"><div class="cctv-label"><span class="cctv-dot"></span> CAM 4 — Garden</div><div class="cctv-placeholder"><i class="fa-solid fa-video"></i><span>Live Feed</span></div></div>
+                    </div>
+                    <div class="intel-grid" style="margin-top:20px">
+                        <div class="glass-card intel-section">
+                            <h3><i class="fa-solid fa-clock-rotate-left"></i> Access Log</h3>
+                            <div class="access-log">
+                                <div class="log-item"><span class="log-time">17:42</span><span class="log-msg">Front door unlocked — Sir Subhash</span><span class="badge confirmed">OK</span></div>
+                                <div class="log-item"><span class="log-time">14:10</span><span class="log-msg">Motion detected — CAM 1</span><span class="badge pending">Alert</span></div>
+                                <div class="log-item"><span class="log-time">09:05</span><span class="log-msg">System armed — Auto protocol</span><span class="badge confirmed">OK</span></div>
+                                <div class="log-item"><span class="log-time">08:30</span><span class="log-msg">Dashboard login — Admin</span><span class="badge confirmed">OK</span></div>
+                            </div>
+                        </div>
+                        <div class="glass-card intel-section">
+                            <h3><i class="fa-solid fa-lock"></i> Lock Controls</h3>
+                            <div class="setting-item"><div class="setting-info"><h4>Front Door Lock</h4><p>Deadbolt — Active</p></div><div class="cyber-toggle active" onclick="this.classList.toggle('active')"></div></div>
+                            <div class="setting-item"><div class="setting-info"><h4>Studio Door</h4><p>Electronic lock</p></div><div class="cyber-toggle active" onclick="this.classList.toggle('active')"></div></div>
+                            <div class="setting-item"><div class="setting-info"><h4>Garage Gate</h4><p>Remote-controlled</p></div><div class="cyber-toggle" onclick="this.classList.toggle('active')"></div></div>
+                            <div class="setting-item"><div class="setting-info"><h4>Motion Alerts</h4><p>Push notifications</p></div><div class="cyber-toggle active" onclick="this.classList.toggle('active')"></div></div>
+                            <div class="setting-item"><div class="setting-info"><h4>Night Vision Mode</h4><p>Auto-enable after 8PM</p></div><div class="cyber-toggle active" onclick="this.classList.toggle('active')"></div></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ===== SCHEDULE VIEW ===== -->
+                <div class="view" id="schedule-view">
+                    <div class="studio-header">
+                        <h2><i class="fa-solid fa-calendar-days" style="color:var(--accent-blue)"></i> Schedule &amp; Timeline</h2>
+                        <button class="btn-primary"><i class="fa-solid fa-plus"></i> Add Event</button>
+                    </div>
+                    <div class="intel-grid">
+                        <div class="glass-card intel-section">
+                            <h3><i class="fa-solid fa-sun text-yellow"></i> Today — <span id="todayDate" style="color:var(--text-muted);font-size:1rem"></span></h3>
+                            <div class="timeline">
+                                <div class="timeline-item done"><span class="tl-time">08:00</span><div class="tl-dot"></div><div class="tl-content"><h4>Morning Brief</h4><p>Olivia reads news &amp; weather</p></div></div>
+                                <div class="timeline-item done"><span class="tl-time">09:30</span><div class="tl-dot"></div><div class="tl-content"><h4>Client Call — Nimal Perera</h4><p>Wedding package discussion</p></div></div>
+                                <div class="timeline-item active"><span class="tl-time">14:00</span><div class="tl-dot"></div><div class="tl-content"><h4>Fashion Shoot — Kasun Silva</h4><p>69 Studio — 3hrs session</p></div></div>
+                                <div class="timeline-item"><span class="tl-time">18:00</span><div class="tl-dot"></div><div class="tl-content"><h4>Invoice Generation</h4><p>Olivia auto-sends invoices</p></div></div>
+                                <div class="timeline-item"><span class="tl-time">22:00</span><div class="tl-dot"></div><div class="tl-content"><h4>Night Lockdown</h4><p>Auto security protocol</p></div></div>
+                            </div>
+                        </div>
+                        <div class="glass-card intel-section">
+                            <h3><i class="fa-solid fa-calendar-week" style="color:var(--accent-blue)"></i> Upcoming Bookings</h3>
+                            <div class="upcoming-list">
+                                <div class="upcoming-item"><div class="upcoming-date"><span class="up-day">25</span><span class="up-month">OCT</span></div><div class="upcoming-info"><h4>Nimal Perera</h4><p>Wedding Photography — Full Day</p></div><span class="badge pending">Pending</span></div>
+                                <div class="upcoming-item"><div class="upcoming-date"><span class="up-day">28</span><span class="up-month">OCT</span></div><div class="upcoming-info"><h4>Kasun Silva</h4><p>Fashion Shoot — 3hrs</p></div><span class="badge confirmed">Confirmed</span></div>
+                                <div class="upcoming-item"><div class="upcoming-date"><span class="up-day">01</span><span class="up-month">NOV</span></div><div class="upcoming-info"><h4>Dilani Fernando</h4><p>Portrait Session — 1.5hrs</p></div><span class="badge confirmed">Confirmed</span></div>
+                                <div class="upcoming-item"><div class="upcoming-date"><span class="up-day">05</span><span class="up-month">NOV</span></div><div class="upcoming-info"><h4>Ruwan Jayawardena</h4><p>Corporate Shoot — Half Day</p></div><span class="badge pending">Pending</span></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
             </div>
         </main>
     </div>
 
+    <!-- Mobile Bottom Navigation Bar (scrollable) -->
+    <nav class="mobile-nav-bar" id="mobileNavBar">
+        <div class="mobile-nav-item active" onclick="switchToView('dashboard')" data-target="dashboard"><i class="fa-solid fa-border-all"></i><span>Dash</span></div>
+        <div class="mobile-nav-item" onclick="switchToView('chat')" data-target="chat"><i class="fa-solid fa-message"></i><span>Comms</span></div>
+        <div class="mobile-nav-item" onclick="switchToView('studio')" data-target="studio"><i class="fa-solid fa-camera"></i><span>Studio</span></div>
+        <div class="mobile-nav-item" onclick="switchToView('smarthome')" data-target="smarthome"><i class="fa-solid fa-house-signal"></i><span>Auto</span></div>
+        <div class="mobile-nav-item" onclick="switchToView('finance')" data-target="finance"><i class="fa-solid fa-wallet"></i><span>Finance</span></div>
+        <div class="mobile-nav-item" onclick="switchToView('security')" data-target="security"><i class="fa-solid fa-shield-halved"></i><span>Security</span></div>
+        <div class="mobile-nav-item" onclick="switchToView('schedule')" data-target="schedule"><i class="fa-solid fa-calendar-days"></i><span>Schedule</span></div>
+        <div class="mobile-nav-item" onclick="switchToView('intel')" data-target="intel"><i class="fa-solid fa-brain"></i><span>Intel</span></div>
+    </nav>
+
     <!-- Floating Global Mic Button -->
-    <button class="global-mic-btn" id="globalMicBtn">
+    <button class="global-mic-btn" id="globalMicBtn" style="display: none;">
         <div class="mic-ripple"></div>
         <i class="fa-solid fa-microphone"></i>
     </button>
 
-    <!-- Dynamic JS Loading for Cache Busting -->
-    <script>
-        document.write('<script src="js/app.js?v=' + new Date().getTime() + '"><\/script>');
-    </script>
+    <!-- JS with Versioning -->
+    <script src="js/app.js?v=2.1"></script>
 </body>
 </html>

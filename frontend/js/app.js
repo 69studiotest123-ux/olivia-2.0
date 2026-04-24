@@ -1,30 +1,154 @@
+// --- Global Functions for HTML calls ---
+const CORRECT_KEY = "69studio"; // Modern Elite Access Key
+
+function handleLogin() {
+    const accessKey = document.getElementById('accessKey').value;
+    const btn = document.querySelector('.login-btn');
+    const btnText = btn.querySelector('span');
+    
+    if (accessKey === CORRECT_KEY) {
+        btnText.innerText = "Access Granted...";
+        btn.style.background = "#10b981";
+        
+        setTimeout(() => {
+            // Hide Login, Show App
+            document.getElementById('loginScreen').style.display = 'none';
+            document.getElementById('appContainer').style.display = 'flex';
+            document.getElementById('mobileTopBar').style.display = 'flex';
+            document.getElementById('globalMicBtn').style.display = 'flex';
+            
+            // Persist session
+            localStorage.setItem('olivia_auth', 'true');
+            
+            // Trigger initial AI greeting
+            console.log("System Initialized.");
+        }, 1000);
+    } else {
+        btnText.innerText = "Invalid Key";
+        btn.style.background = "#ff3344";
+        setTimeout(() => {
+            btnText.innerText = "Initialize System";
+            btn.style.background = "";
+        }, 2000);
+    }
+}
+
+function switchToView(target) {
+    if (window.appSwitchView) {
+        window.appSwitchView(target);
+    } else {
+        console.error("appSwitchView not initialized yet.");
+    }
+}
+
+async function triggerAction(actionName) {
+    console.log(`Triggering action: ${actionName}`);
+    try {
+        await fetch(`http://84.235.242.22:8000/control/scene/${actionName}`);
+    } catch(e) {
+        console.warn("Failed to send command to backend.");
+    }
+}
+
 document.addEventListener('DOMContentLoaded', () => {
+    console.log("Olivia 2.0 System Initializing...");
+
+    // --- Check Auth ---
+    if (localStorage.getItem('olivia_auth') === 'true') {
+        document.getElementById('loginScreen').style.display = 'none';
+        document.getElementById('appContainer').style.display = 'flex';
+        document.getElementById('mobileTopBar').style.display = 'flex';
+        document.getElementById('globalMicBtn').style.display = 'flex';
+    }
     
-    // --- Navigation Logic ---
+    // --- Navigation Elements ---
     const navItems = document.querySelectorAll('.nav-item');
+    const mobileNavItems = document.querySelectorAll('.mobile-nav-item');
     const views = document.querySelectorAll('.view');
-    
+    const sidebar = document.querySelector('.sidebar');
+    const sidebarOverlay = document.getElementById('sidebarOverlay');
+
+    // --- View Switching Core ---
+    window.appSwitchView = (target) => {
+        console.log(`Switching to view: ${target}`);
+        // Deactivate all
+        views.forEach(v => v.classList.remove('active'));
+        navItems.forEach(n => n.classList.remove('active'));
+        mobileNavItems.forEach(n => n.classList.remove('active'));
+
+        // Activate target
+        const targetView = document.getElementById(`${target}-view`);
+        if (targetView) {
+            targetView.classList.add('active');
+        } else {
+            console.warn(`View ID ${target}-view not found.`);
+        }
+
+        // Sync Sidebar
+        navItems.forEach(n => {
+            if (n.getAttribute('data-target') === target) n.classList.add('active');
+        });
+
+        // Sync Mobile Nav
+        const activeMobileItem = Array.from(mobileNavItems).find(n => n.getAttribute('data-target') === target);
+        if (activeMobileItem) {
+            activeMobileItem.classList.add('active');
+            activeMobileItem.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+        }
+
+        // Mobile specific: Close sidebar if open
+        if (sidebar && sidebar.classList.contains('mobile-open')) {
+            sidebar.classList.remove('mobile-open');
+            if (sidebarOverlay) sidebarOverlay.classList.remove('open');
+        }
+    };
+
+    // Attach listeners to Sidebar (Fallback for desktop clicking)
     navItems.forEach(item => {
         item.addEventListener('click', () => {
-            // Remove active classes
-            navItems.forEach(n => n.classList.remove('active'));
-            views.forEach(v => v.classList.remove('active'));
-            
-            // Add active class to clicked item
-            item.classList.add('active');
-            
-            // Show corresponding view
             const target = item.getAttribute('data-target');
-            document.getElementById(`${target}-view`).classList.add('active');
+            window.appSwitchView(target);
         });
     });
 
-    // --- Time Greeting Logic ---
+    // --- Time & Date Logic ---
     const timeGreeting = document.getElementById('timeGreeting');
-    const hour = new Date().getHours();
-    if (hour < 12) timeGreeting.innerText = "Good Morning, Sir.";
-    else if (hour < 18) timeGreeting.innerText = "Good Afternoon, Sir.";
-    else timeGreeting.innerText = "Good Evening, Sir.";
+    const todayDateEl = document.getElementById('todayDate');
+    const now = new Date();
+    
+    // Greeting
+    const hour = now.getHours();
+    if (timeGreeting) {
+        if (hour < 12) timeGreeting.innerText = "Good Morning, Sir.";
+        else if (hour < 18) timeGreeting.innerText = "Good Afternoon, Sir.";
+        else timeGreeting.innerText = "Good Evening, Sir.";
+    }
+
+    // Schedule Date
+    if (todayDateEl) {
+        const options = { weekday: 'long', month: 'long', day: 'numeric' };
+        todayDateEl.innerText = now.toLocaleDateString('en-US', options);
+    }
+
+    // --- Mobile Sidebar Toggle ---
+    const mobileSidebarBtn = document.getElementById('mobileSidebarBtn');
+
+    if (mobileSidebarBtn && sidebar) {
+        mobileSidebarBtn.addEventListener('click', () => {
+            sidebar.classList.add('mobile-open');
+            if (sidebarOverlay) {
+                sidebarOverlay.classList.add('open');
+                sidebarOverlay.style.display = 'block';
+            }
+        });
+    }
+    if (sidebarOverlay && sidebar) {
+        sidebarOverlay.addEventListener('click', () => {
+            sidebar.classList.remove('mobile-open');
+            sidebarOverlay.classList.remove('open');
+            sidebarOverlay.style.display = 'none';
+        });
+    }
 
     // --- Chat Logic ---
     const chatInput = document.getElementById('chatInput');
@@ -32,84 +156,67 @@ document.addEventListener('DOMContentLoaded', () => {
     const chatMessages = document.getElementById('chatMessages');
 
     async function sendMessage() {
+        if (!chatInput) return;
         const text = chatInput.value.trim();
         if (!text) return;
 
-        // Add user message to UI
         addMessage(text, 'user');
         chatInput.value = '';
 
-        // Show typing indicator or orb animation
         const aiOrb = document.getElementById('aiOrb');
-        aiOrb.classList.add('speaking-anim');
-        document.querySelector('.ai-status-text').innerText = "Processing...";
+        const statusText = document.querySelector('.ai-status-text');
+        
+        if (aiOrb) aiOrb.classList.add('speaking-anim');
+        if (statusText) statusText.innerText = "Processing...";
 
         try {
-            // Call Python Backend
             const response = await fetch("http://84.235.242.22:8000/chat", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ prompt: text, model_type: "gemini" })
             });
             const data = await response.json();
-            
-            // Add bot response to UI
             addMessage(data.response || "Error getting response", 'bot');
         } catch (error) {
             console.error("Backend error:", error);
             addMessage("Sir, I cannot reach the main server at the moment.", 'bot');
         } finally {
-            aiOrb.classList.remove('speaking-anim');
-            document.querySelector('.ai-status-text').innerText = "Standby";
+            if (aiOrb) aiOrb.classList.remove('speaking-anim');
+            if (statusText) statusText.innerText = "Standby";
         }
     }
 
     function addMessage(text, sender) {
+        if (!chatMessages) return;
         const msgDiv = document.createElement('div');
         msgDiv.className = `message ${sender}`;
-        
         const avatar = sender === 'user' ? '<i class="fa-solid fa-user"></i>' : '<img src="olivia.png" alt="O">';
-        
-        msgDiv.innerHTML = `
-            <div class="msg-avatar">${avatar}</div>
-            <div class="msg-bubble">${text}</div>
-        `;
-        
+        msgDiv.innerHTML = `<div class="msg-avatar">${avatar}</div><div class="msg-bubble">${text}</div>`;
         chatMessages.appendChild(msgDiv);
-        chatMessages.scrollTop = chatMessages.scrollHeight; // Auto-scroll
+        chatMessages.scrollTop = chatMessages.scrollHeight;
     }
 
-    chatSendBtn.addEventListener('click', sendMessage);
-    chatInput.addEventListener('keypress', (e) => {
-        if (e.key === 'Enter') sendMessage();
-    });
+    if (chatSendBtn && chatInput) {
+        chatSendBtn.addEventListener('click', sendMessage);
+        chatInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') sendMessage(); });
+    }
 
-    // --- Voice Action Logic (Mock) ---
+    // --- Global Mic Button ---
     const globalMicBtn = document.getElementById('globalMicBtn');
     const aiOrb = document.getElementById('aiOrb');
 
-    globalMicBtn.addEventListener('click', () => {
-        const statusText = document.querySelector('.ai-status-text');
-        
-        if (aiOrb.classList.contains('speaking-anim')) {
-            aiOrb.classList.remove('speaking-anim');
-            statusText.innerText = "Standby";
-        } else {
-            aiOrb.classList.add('speaking-anim');
-            statusText.innerText = "Listening...";
-            // Here you would integrate Web Speech API or ElevenLabs / Whisper
-        }
-    });
-
-});
-
-// --- Quick Actions ---
-async function triggerAction(actionName) {
-    console.log(`Triggering action: ${actionName}`);
-    try {
-        await fetch(`http://84.235.242.22:8000/control/scene/${actionName}`);
-        alert(`${actionName} command sent to Cloud Brain.`);
-    } catch(e) {
-        alert("Failed to send command. Ensure backend is running.");
+    if (globalMicBtn) {
+        globalMicBtn.addEventListener('click', () => {
+            const statusText = document.querySelector('.ai-status-text');
+            if (aiOrb && aiOrb.classList.contains('speaking-anim')) {
+                aiOrb.classList.remove('speaking-anim');
+                if (statusText) statusText.innerText = "Standby";
+            } else {
+                if (aiOrb) aiOrb.classList.add('speaking-anim');
+                if (statusText) statusText.innerText = "Listening...";
+            }
+        });
     }
-}
+
+    console.log("Olivia 2.0 System Online.");
+});
