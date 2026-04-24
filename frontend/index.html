@@ -174,6 +174,72 @@
                     </div>
                 </div>
 
+                <!-- Intel / Settings View -->
+                <div class="view" id="intel-view">
+                    <div class="studio-header">
+                        <h2>Elite Command Center</h2>
+                        <button class="btn-primary" onclick="alert('System Reboot Initiated')"><i class="fa-solid fa-power-off"></i> System Restart</button>
+                    </div>
+
+                    <div class="intel-grid">
+                        <!-- Core Overrides -->
+                        <div class="glass-card intel-section">
+                            <h3><i class="fa-solid fa-microchip"></i> Core Overrides</h3>
+                            
+                            <div class="setting-item">
+                                <div class="setting-info">
+                                    <h4>Proactive Memory</h4>
+                                    <p>AI will analyze context automatically</p>
+                                </div>
+                                <div class="cyber-toggle active" onclick="this.classList.toggle('active')"></div>
+                            </div>
+                            
+                            <div class="setting-item">
+                                <div class="setting-info">
+                                    <h4>Voice Feedback</h4>
+                                    <p>Text-to-speech engine enabled</p>
+                                </div>
+                                <div class="cyber-toggle active" onclick="this.classList.toggle('active')"></div>
+                            </div>
+
+                            <div class="setting-item">
+                                <div class="setting-info">
+                                    <h4>Deep Sleep Mode</h4>
+                                    <p>Conserve server resources</p>
+                                </div>
+                                <div class="cyber-toggle" onclick="this.classList.toggle('active')"></div>
+                            </div>
+                        </div>
+
+                        <!-- System Status -->
+                        <div class="glass-card intel-section">
+                            <h3><i class="fa-solid fa-server"></i> Cloud Infrastructure</h3>
+                            <div class="system-status-grid">
+                                <div class="status-box">
+                                    <i class="fa-brands fa-ubuntu"></i>
+                                    <h4>Oracle VM</h4>
+                                    <div class="val good">ONLINE</div>
+                                </div>
+                                <div class="status-box">
+                                    <i class="fa-solid fa-network-wired"></i>
+                                    <h4>Latency</h4>
+                                    <div class="val good">24ms</div>
+                                </div>
+                                <div class="status-box">
+                                    <i class="fa-solid fa-brain"></i>
+                                    <h4>Gemini Core</h4>
+                                    <div class="val good">ACTIVE</div>
+                                </div>
+                                <div class="status-box">
+                                    <i class="fa-solid fa-desktop"></i>
+                                    <h4>PC Bridge</h4>
+                                    <div class="val warn">WAITING</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
             </div>
         </main>
     </div>
