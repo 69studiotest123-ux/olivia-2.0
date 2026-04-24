@@ -182,6 +182,100 @@
                     </div>
                 </div>
 
+                <!-- Smart Home View -->
+                <div class="view" id="smarthome-view">
+                    <div class="studio-header">
+                        <h2>Automations & Home Control</h2>
+                        <button class="btn-primary" onclick="alert('Scanning for new devices...')"><i class="fa-solid fa-satellite-dish"></i> Scan Devices</button>
+                    </div>
+
+                    <div class="intel-grid">
+                        <!-- Daily Protocols -->
+                        <div class="glass-card intel-section" style="grid-column: span 2;">
+                            <h3><i class="fa-solid fa-bolt"></i> Elite Protocols</h3>
+                            <div class="quick-actions" style="margin-top: 10px;">
+                                <div class="glass-card action-card" onclick="triggerAction('morning_brief')">
+                                    <i class="fa-solid fa-sun text-yellow"></i>
+                                    <h4>Morning Protocol</h4>
+                                    <p>Read news, schedule & open blinds</p>
+                                </div>
+                                <div class="glass-card action-card" onclick="triggerAction('deep_work')">
+                                    <i class="fa-solid fa-headphones" style="color: var(--accent-blue);"></i>
+                                    <h4>Deep Work</h4>
+                                    <p>Mute notifications & play focus music</p>
+                                </div>
+                                <div class="glass-card action-card" onclick="triggerAction('night_lockdown')">
+                                    <i class="fa-solid fa-moon" style="color: var(--text-muted);"></i>
+                                    <h4>Night Lockdown</h4>
+                                    <p>Dim lights, lock doors, alarm ON</p>
+                                </div>
+                                <div class="glass-card action-card" onclick="triggerAction('pc_shutdown')" style="border-color: var(--primary);">
+                                    <i class="fa-solid fa-power-off text-main"></i>
+                                    <h4>Kill Switch</h4>
+                                    <p>Remote shutdown host PC</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Physical Devices -->
+                        <div class="glass-card intel-section">
+                            <h3><i class="fa-solid fa-plug"></i> Connected Hardware</h3>
+                            
+                            <div class="setting-item">
+                                <div class="setting-info">
+                                    <h4>Front Door Lock</h4>
+                                    <p>Main entrance security</p>
+                                </div>
+                                <div class="cyber-toggle active" onclick="this.classList.toggle('active')"></div>
+                            </div>
+                            
+                            <div class="setting-item">
+                                <div class="setting-info">
+                                    <h4>CCTV Cameras</h4>
+                                    <p>Motion detection enabled</p>
+                                </div>
+                                <div class="cyber-toggle active" onclick="this.classList.toggle('active')"></div>
+                            </div>
+
+                            <div class="setting-item">
+                                <div class="setting-info">
+                                    <h4>Living Room TV</h4>
+                                    <p>Currently playing: Netflix</p>
+                                </div>
+                                <div class="cyber-toggle" onclick="this.classList.toggle('active')"></div>
+                            </div>
+                        </div>
+
+                        <!-- Environmental Controls -->
+                        <div class="glass-card intel-section">
+                            <h3><i class="fa-solid fa-temperature-half"></i> Environment</h3>
+                            
+                            <div class="system-status-grid">
+                                <div class="status-box">
+                                    <i class="fa-solid fa-thermometer"></i>
+                                    <h4>Indoor Temp</h4>
+                                    <div class="val good">24°C</div>
+                                </div>
+                                <div class="status-box">
+                                    <i class="fa-solid fa-droplet"></i>
+                                    <h4>Humidity</h4>
+                                    <div class="val good">45%</div>
+                                </div>
+                                <div class="status-box">
+                                    <i class="fa-solid fa-wind"></i>
+                                    <h4>Air Quality</h4>
+                                    <div class="val good">98 AQI</div>
+                                </div>
+                                <div class="status-box">
+                                    <i class="fa-solid fa-lightbulb"></i>
+                                    <h4>Ambient Light</h4>
+                                    <div class="val warn">Dim</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- Intel / Settings View -->
                 <div class="view" id="intel-view">
                     <div class="studio-header">
