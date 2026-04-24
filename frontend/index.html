@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Olivia 2.0 - Elite AI Assistant</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <!-- Background Ambient Effects -->
+    <div class="ambient-background">
+        <div class="glow-orb orb-1"></div>
+        <div class="glow-orb orb-2"></div>
+    </div>
+
+    <!-- Main Container -->
+    <div class="app-container">
+        
+        <!-- Sidebar -->
+        <nav class="sidebar">
+            <div class="brand">
+                <div class="brand-logo">
+                    <div class="pulse-ring-small"></div>
+                    <span>O</span>
+                </div>
+                <h2>OLIVIA <span>2.0</span></h2>
+            </div>
+            
+            <ul class="nav-links">
+                <li class="nav-item active" data-target="dashboard">
+                    <i class="fa-solid fa-border-all"></i>
+                    <span>Dashboard</span>
+                </li>
+                <li class="nav-item" data-target="chat">
+                    <i class="fa-solid fa-message"></i>
+                    <span>Comms</span>
+                </li>
+                <li class="nav-item" data-target="studio">
+                    <i class="fa-solid fa-camera"></i>
+                    <span>69 Studio</span>
+                </li>
+                <li class="nav-item" data-target="smarthome">
+                    <i class="fa-solid fa-house-signal"></i>
+                    <span>Smart Home</span>
+                </li>
+                <li class="nav-item" data-target="intel">
+                    <i class="fa-solid fa-brain"></i>
+                    <span>Intel</span>
+                </li>
+            </ul>
+            
+            <div class="user-profile">
+                <div class="avatar">
+                    <i class="fa-solid fa-user-tie"></i>
+                </div>
+                <div class="info">
+                    <h4>Sir Subhash</h4>
+                    <p>System Admin</p>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Main Content Area -->
+        <main class="main-content">
+            
+            <!-- Top Header -->
+            <header class="top-header">
+                <div class="greeting">
+                    <h1 id="timeGreeting">Good Evening, Sir.</h1>
+                    <p>All systems online and ready.</p>
+                </div>
+                <div class="header-actions">
+                    <div class="status-badge">
+                        <div class="status-dot"></div>
+                        Connected
+                    </div>
+                    <button class="icon-btn"><i class="fa-solid fa-bell"></i></button>
+                    <button class="icon-btn"><i class="fa-solid fa-gear"></i></button>
+                </div>
+            </header>
+
+            <!-- Dynamic Views -->
+            <div class="views-container">
+                
+                <!-- Dashboard View -->
+                <div class="view active" id="dashboard-view">
+                    <!-- Central AI Orb Component -->
+                    <div class="ai-core-container">
+                        <div class="ai-orb" id="aiOrb">
+                            <img src="olivia.png" alt="Olivia" class="olivia-avatar-main">
+                            <div class="orb-ring ring-1"></div>
+                            <div class="orb-ring ring-2"></div>
+                            <div class="orb-ring ring-3"></div>
+                            <div class="orb-waves"></div>
+                        </div>
+                        <h3 class="ai-status-text">Listening...</h3>
+                    </div>
+
+                    <!-- Quick Action Cards -->
+                    <div class="quick-actions">
+                        <div class="glass-card action-card" onclick="triggerAction('spotify')">
+                            <i class="fa-brands fa-spotify spotify-color"></i>
+                            <h4>Play Focus Music</h4>
+                            <p>Deep work playlist</p>
+                        </div>
+                        <div class="glass-card action-card" onclick="triggerAction('work_mode')">
+                            <i class="fa-solid fa-code"></i>
+                            <h4>Dev Mode</h4>
+                            <p>Launch IDE & Tools</p>
+                        </div>
+                        <div class="glass-card action-card">
+                            <i class="fa-solid fa-camera"></i>
+                            <h4>New Booking</h4>
+                            <p>69 Studio Client</p>
+                        </div>
+                        <div class="glass-card action-card">
+                            <i class="fa-solid fa-lightbulb text-yellow"></i>
+                            <h4>Studio Lights</h4>
+                            <p>Toggle ON/OFF</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Chat/Comms View -->
+                <div class="view" id="chat-view">
+                    <div class="chat-container glass-card">
+                        <div class="chat-messages" id="chatMessages">
+                            <div class="message bot">
+                                <div class="msg-avatar"><img src="olivia.png" alt="O"></div>
+                                <div class="msg-bubble">Hello Sir. How can I assist you today?</div>
+                            </div>
+                        </div>
+                        <div class="chat-input-area">
+                            <button class="voice-btn" id="chatVoiceBtn"><i class="fa-solid fa-microphone"></i></button>
+                            <input type="text" id="chatInput" placeholder="Type your command here..." autocomplete="off">
+                            <button class="send-btn" id="chatSendBtn"><i class="fa-solid fa-paper-plane"></i></button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 69 Studio View -->
+                <div class="view" id="studio-view">
+                    <div class="studio-header">
+                        <h2>69 Studio Management</h2>
+                        <button class="btn-primary"><i class="fa-solid fa-plus"></i> Add Booking</button>
+                    </div>
+                    <div class="glass-card table-container">
+                        <table class="modern-table">
+                            <thead>
+                                <tr>
+                                    <th>Client Name</th>
+                                    <th>Service</th>
+                                    <th>Date & Time</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>Nimal Perera</td>
+                                    <td>Wedding Photography</td>
+                                    <td>Oct 25, 10:00 AM</td>
+                                    <td><span class="badge pending">Pending</span></td>
+                                </tr>
+                                <tr>
+                                    <td>Kasun Silva</td>
+                                    <td>Fashion Shoot</td>
+                                    <td>Oct 28, 02:00 PM</td>
+                                    <td><span class="badge confirmed">Confirmed</span></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+            </div>
+        </main>
+    </div>
+
+    <!-- Floating Global Mic Button -->
+    <button class="global-mic-btn" id="globalMicBtn">
+        <div class="mic-ripple"></div>
+        <i class="fa-solid fa-microphone"></i>
+    </button>
+
+    <script src="js/app.js"></script>
+</body>
+</html>

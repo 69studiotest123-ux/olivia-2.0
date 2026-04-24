@@ -1,0 +1,11 @@
+fastapi
+uvicorn
+pydantic
+requests
+langchain
+langchain-openai
+langchain-google-genai
+python-dotenv
+sqlalchemy
+psycopg2-binary
+firebase-admin
