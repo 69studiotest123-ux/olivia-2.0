@@ -60,11 +60,19 @@ function handleLogin() {
         btn.style.background = "#10b981";
         
         setTimeout(() => {
-            // Hide Login, Show App
-            document.getElementById('loginScreen').style.display = 'none';
-            document.getElementById('appContainer').style.display = 'flex';
-            document.getElementById('mobileTopBar').style.display = 'flex';
-            document.getElementById('globalMicBtn').style.display = 'flex';
+            setTimeout(() => {
+                document.getElementById('loginScreen').style.opacity = '0';
+                document.getElementById('appContainer').style.display = 'flex';
+                document.getElementById('mobileTopBar').style.display = 'flex';
+                document.getElementById('globalMicBtn').style.display = 'grid';
+                
+                // Load sync'd chat
+                if (typeof loadChatHistory === 'function') loadChatHistory();
+                
+                setTimeout(() => {
+                    document.getElementById('loginScreen').style.display = 'none';
+                }, 500);
+            }, 1000);
             
             // Persist session
             localStorage.setItem('olivia_auth', 'true');
@@ -103,11 +111,31 @@ document.addEventListener('DOMContentLoaded', () => {
     console.log("Olivia 2.0 System Initializing...");
 
     // --- Check Auth ---
+    async function loadChatHistory() {
+        if (!chatMessages) return;
+        try {
+            const response = await fetch("http://84.235.242.22:8000/chat/history");
+            const history = await response.json();
+            chatMessages.innerHTML = ''; // Clear existing
+            history.forEach(msg => {
+                addMessage(msg.content, msg.sender);
+            });
+        } catch (e) {
+            console.error("History error:", e);
+        }
+    }
+
     if (localStorage.getItem('olivia_auth') === 'true') {
-        document.getElementById('loginScreen').style.display = 'none';
-        document.getElementById('appContainer').style.display = 'flex';
+        const appContainer = document.getElementById('appContainer');
+        const loginScreen = document.getElementById('loginScreen');
+        const globalMicBtn = document.getElementById('globalMicBtn');
+        
+        if (appContainer) appContainer.style.display = 'flex';
+        if (loginScreen) loginScreen.style.display = 'none';
+        if (globalMicBtn) globalMicBtn.style.display = 'grid';
+        
         document.getElementById('mobileTopBar').style.display = 'flex';
-        document.getElementById('globalMicBtn').style.display = 'flex';
+        loadChatHistory(); // Load sync'd chat
     }
     
     // --- Navigation Elements ---

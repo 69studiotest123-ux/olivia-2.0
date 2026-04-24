@@ -33,6 +33,14 @@ class BookingModel(Base):
     date_time = Column(String)
     created_at = Column(DateTime, default=datetime.utcnow)
 
+# --- Chat History Table ---
+class ChatMessage(Base):
+    __tablename__ = "chat_history"
+    id = Column(Integer, primary_key=True, index=True)
+    sender = Column(String) # 'user' or 'bot'
+    content = Column(String)
+    timestamp = Column(DateTime, default=datetime.utcnow)
+
 # Create all tables
 Base.metadata.create_all(bind=engine)
 

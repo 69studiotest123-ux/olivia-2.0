@@ -14,6 +14,9 @@ import base64
 from langchain_core.messages import HumanMessage
 from langchain_openai import ChatOpenAI
 from langchain_google_genai import ChatGoogleGenerativeAI
+from sqlalchemy.orm import Session
+from fastapi import Depends
+from database import get_db, ChatMessage
 
 app = FastAPI(title="Olivia Elite Core")
 
@@ -41,10 +44,15 @@ class ChatRequest(BaseModel):
     model_type: str = "gemini"
 
 @app.post("/chat")
-async def chat_endpoint(request: ChatRequest):
+async def chat_endpoint(request: ChatRequest, db: Session = Depends(get_db)):
     import time
     max_retries = 3
     retry_delay = 2 # seconds
+
+    # 1. Save user message to DB
+    user_msg = ChatMessage(sender="user", content=request.prompt)
+    db.add(user_msg)
+    db.commit()
 
     # Enhance prompt if it's a system command
     prompt = request.prompt
@@ -56,6 +64,12 @@ async def chat_endpoint(request: ChatRequest):
             if request.model_type == "gemini":
                 llm = get_gemini_model()
                 response = llm.invoke(prompt).content
+                
+                # 2. Save bot response to DB
+                bot_msg = ChatMessage(sender="bot", content=response)
+                db.add(bot_msg)
+                db.commit()
+                
                 return {"response": response}
         except Exception as e:
             error_str = str(e)
@@ -71,6 +85,11 @@ async def chat_endpoint(request: ChatRequest):
                 return {"response": f"Error: {error_str}"}
     
     return {"response": "System busy. Please try again shortly."}
+
+@app.get("/chat/history")
+async def get_chat_history(db: Session = Depends(get_db)):
+    messages = db.query(ChatMessage).order_by(ChatMessage.timestamp.asc()).all()
+    return [{"sender": m.sender, "content": m.content, "timestamp": m.timestamp} for m in messages]
 
 # --- 1. PROACTIVE MEMORY SYSTEM ---
 def save_to_memory(user_id, key, value):
