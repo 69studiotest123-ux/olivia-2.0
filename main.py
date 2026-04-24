@@ -87,16 +87,38 @@ def check_business_status():
 @app.get("/control/scene/{scene_name}")
 def activate_scene(scene_name: str):
     if scene_name == "studio_mode":
-        # Turn on Sonoff Lights via IFTTT
-        # requests.post("https://maker.ifttt.com/trigger/studio_lights/with/key/...")
-        
-        # Queue commands for the PC Bridge
         pc_command_queue.append("figma")
         pc_command_queue.append("spotify")
-        return {"status": "Studio Mode Activated, waiting for PC Bridge to execute."}
-    elif scene_name == "dev_mode":
-        pc_command_queue.append("code")
-        return {"status": "Dev Mode Activated, waiting for PC Bridge to execute."}
+        return {"status": "Studio Mode Activated", "queued": ["figma", "spotify"]}
+    
+    elif scene_name in ["dev_mode", "work_mode"]:
+        pc_command_queue.append("work_mode")
+        return {"status": "Dev Mode Activated", "queued": ["work_mode"]}
+    
+    elif scene_name == "spotify":
+        pc_command_queue.append("spotify")
+        return {"status": "Spotify queued for PC Bridge"}
+    
+    elif scene_name == "morning_brief":
+        pc_command_queue.append("morning_brief")
+        return {"status": "☀️ Morning Protocol queued! PC will speak and open Calendar + News."}
+    
+    elif scene_name == "deep_work":
+        pc_command_queue.append("deep_work")
+        return {"status": "🎧 Deep Work Mode queued! Spotify + VS Code opening."}
+    
+    elif scene_name == "night_lockdown":
+        pc_command_queue.append("night_lockdown")
+        return {"status": "🌙 Night Lockdown queued! PC will lock itself."}
+    
+    elif scene_name == "pc_shutdown":
+        pc_command_queue.append("pc_shutdown")
+        return {"status": "⚠️ KILL SWITCH activated! PC shutting down in 60 seconds."}
+    
+    else:
+        # Generic fallback - queue any unknown scene as a command
+        pc_command_queue.append(scene_name)
+        return {"status": f"Command '{scene_name}' queued for PC Bridge."}
 
 # Endpoints for the Local PC Bridge to poll
 @app.get("/pc/commands")
