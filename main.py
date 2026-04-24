@@ -31,25 +31,41 @@ app.add_middleware(
 )
 
 # --- AI Models Initialization ---
-# Gemini 2.0 Flash for Speed, GPT-4o for Complex Logic
 def get_gemini_model():
     api_key = os.getenv("GOOGLE_API_KEY", "YOUR_GEMINI_KEY")
     return ChatGoogleGenerativeAI(model="gemini-2.0-flash", api_key=api_key)
 
-# --- Chat Endpoint (Required for Frontend UI) ---
+# --- Chat Endpoint with Retry Logic ---
 class ChatRequest(BaseModel):
     prompt: str
     model_type: str = "gemini"
 
 @app.post("/chat")
 async def chat_endpoint(request: ChatRequest):
-    try:
-        if request.model_type == "gemini":
-            llm = get_gemini_model()
-            response = llm.invoke(request.prompt).content
-            return {"response": response}
-    except Exception as e:
-        return {"response": f"Error: {str(e)}"}
+    import time
+    max_retries = 3
+    retry_delay = 2 # seconds
+
+    for attempt in range(max_retries):
+        try:
+            if request.model_type == "gemini":
+                llm = get_gemini_model()
+                response = llm.invoke(request.prompt).content
+                return {"response": response}
+        except Exception as e:
+            error_str = str(e)
+            if "429" in error_str or "RESOURCE_EXHAUSTED" in error_str:
+                if attempt < max_retries - 1:
+                    print(f"Quota exceeded. Retrying in {retry_delay}s... (Attempt {attempt+1})")
+                    time.sleep(retry_delay)
+                    retry_delay *= 2 # Exponential backoff
+                    continue
+                else:
+                    return {"response": "Sir, මගේ Quota එක මේ වෙලාවේ ඉවරයි. කරුණාකර විනාඩියකින් ආයේ උත්සාහ කරන්න."}
+            else:
+                return {"response": f"Error: {error_str}"}
+    
+    return {"response": "System busy. Please try again shortly."}
 
 # --- 1. PROACTIVE MEMORY SYSTEM ---
 def save_to_memory(user_id, key, value):
