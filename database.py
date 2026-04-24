@@ -41,6 +41,30 @@ class ChatMessage(Base):
     content = Column(String)
     timestamp = Column(DateTime, default=datetime.utcnow)
 
+# --- Inventory Table ---
+class InventoryItem(Base):
+    __tablename__ = "inventory"
+    id = Column(Integer, primary_key=True, index=True)
+    item_name = Column(String, index=True)
+    stock_count = Column(Integer)
+    min_threshold = Column(Integer, default=5) # Alert when below this
+
+# --- Market Price Tracking ---
+class MarketPrice(Base):
+    __tablename__ = "market_prices"
+    id = Column(Integer, primary_key=True, index=True)
+    asset_name = Column(String) # Gold, Gem, etc.
+    price = Column(String)
+    updated_at = Column(DateTime, default=datetime.utcnow)
+
+# --- Life Patterns & Memory ---
+class UserPattern(Base):
+    __tablename__ = "user_patterns"
+    id = Column(Integer, primary_key=True, index=True)
+    pattern_key = Column(String) # sleep_time, work_start, etc.
+    pattern_val = Column(String)
+    confidence = Column(Integer, default=0)
+
 # Create all tables
 Base.metadata.create_all(bind=engine)
 

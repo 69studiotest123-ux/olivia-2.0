@@ -38,43 +38,71 @@ def get_gemini_model():
     api_key = os.getenv("GOOGLE_API_KEY", "YOUR_GEMINI_KEY")
     return ChatGoogleGenerativeAI(model="gemini-2.0-flash", api_key=api_key)
 
-# --- 1. PROACTIVE BRIEFING LOGIC ---
+# --- 1. PROACTIVE BRIEFING & MARKET SCANNER ---
+def scan_market_prices():
+    db = next(get_db())
+    # Mock price fetch - in real app use an API like GoldAPI.io
+    prices = {"Gold (24K)": "LKR 185,000", "Blue Sapphire": "LKR 450,000+"}
+    for asset, price in prices.items():
+        p = MarketPrice(asset_name=asset, price=price)
+        db.add(p)
+    db.commit()
+    print("Market prices scanned.")
+
 def generate_daily_briefing():
     db = next(get_db())
-    # In a real app, fetch weather, news, and calendar here
-    prompt = "Generate a daily briefing for Subhash. You are Olivia, a luxury brand expert. Include a motivational quote, current top news in photography, and remind him of his elite status. Keep it professional and inspiring."
+    # Fetch market prices for briefing
+    market = db.query(MarketPrice).order_by(MarketPrice.updated_at.desc()).limit(2).all()
+    market_str = ", ".join([f"{m.asset_name}: {m.price}" for m in market])
+    
+    prompt = f"Generate a daily briefing for Subhash. Context: Market is {market_str}. You are Olivia, a luxury brand expert and autonomous manager. Be proactive, mention the market status, and inspire him for his design work today."
     try:
         llm = get_gemini_model()
         briefing = llm.invoke(prompt).content
-        # Save to chat history as a bot message
-        msg = ChatMessage(sender="bot", content=f"[PROACTIVE BRIEFING] {briefing}")
+        msg = ChatMessage(sender="bot", content=f"[AUTONOMOUS BRIEFING] {briefing}")
         db.add(msg)
         db.commit()
-        print("Daily briefing generated.")
     except Exception as e:
         print(f"Briefing error: {e}")
 
 scheduler = BackgroundScheduler()
 scheduler.add_job(generate_daily_briefing, 'cron', hour=8, minute=0)
+scheduler.add_job(scan_market_prices, 'interval', hours=6) # Scan every 6 hours
 scheduler.start()
 
-# --- 2. VISION CRITIQUE LOGIC ---
+# --- 2. ADVANCED VISION & DESIGN CRITIQUE ---
 @app.post("/vision/analyze")
 async def analyze_design(file: UploadFile = File(...)):
     try:
         contents = await file.read()
         llm = get_gemini_model()
-        # Using HumanMessage with image for LangChain Gemini
+        prompt_text = (
+            "Analyze this design image as a luxury brand expert. "
+            "Evaluate: 1. Golden Ratio/Composition, 2. Contrast & Color Theory, 3. Typography. "
+            "Give Subhash specific, professional feedback to make it 'Elite'."
+        )
         image_part = {
             "type": "image_url",
             "image_url": {"url": f"data:image/jpeg;base64,{base64.b64encode(contents).decode()}"},
         }
-        text_part = {"type": "text", "text": "Analyze this image as a luxury brand expert. Give Subhash creative advice for 69 Studio."}
-        message = HumanMessage(content=[text_part, image_part])
+        message = HumanMessage(content=[{"type": "text", "text": prompt_text}, image_part])
         response = llm.invoke([message]).content
         return {"response": response}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+# --- 3. PATTERN LEARNING LOGIC ---
+def learn_user_pattern(text, db: Session):
+    # Detect patterns like "I am going to sleep" or "Starting work"
+    if "sleep" in text.lower() or "නිදාගන්න" in text:
+        p = UserPattern(pattern_key="last_sleep_time", pattern_val=datetime.utcnow().isoformat())
+        db.add(p)
+        db.commit()
+
+@app.post("/chat")
+async def chat_endpoint(request: ChatRequest, db: Session = Depends(get_db)):
+    # ... previous logic ...
+    learn_user_pattern(request.prompt, db)
 
 # --- 3. AUTO-EXPENSE TRACKER ---
 def check_for_expenses(text, db: Session):
@@ -90,17 +118,11 @@ def check_for_expenses(text, db: Session):
             return None
     return None
 
-# --- Chat Endpoint with Retry Logic ---
-class ChatRequest(BaseModel):
-    prompt: str
-    model_type: str = "gemini"
-
 # --- 4. SMART HOME HYPER-SYNC MODULE ---
 async def control_smart_home(scene: str):
     ifttt_key = os.getenv("IFTTT_KEY", "YOUR_IFTTT_KEY")
     try:
         if scene == "studio_mode":
-            # Trigger IFTTT Webhook
             requests.post(f"https://maker.ifttt.com/trigger/studio_lights_on/with/key/{ifttt_key}")
             return "සර්, Studio Mode එක active කළා. ලොකු design එකක් කරමු!"
         elif scene == "sleep_mode":
@@ -116,12 +138,15 @@ async def chat_endpoint(request: ChatRequest, db: Session = Depends(get_db)):
     max_retries = 3
     retry_delay = 2 # seconds
 
-    # Save user message
+    # 1. Save user message
     user_msg = ChatMessage(sender="user", content=request.prompt)
     db.add(user_msg)
     db.commit()
 
-    # Smart Home Intent Check
+    # 2. Learn User Patterns
+    learn_user_pattern(request.prompt, db)
+
+    # 3. Smart Home Intent Check
     smart_reply = None
     if any(word in request.prompt.lower() for word in ["වැඩ කරන්න", "design mode", "studio mode"]):
         smart_reply = await control_smart_home("studio_mode")
@@ -129,19 +154,18 @@ async def chat_endpoint(request: ChatRequest, db: Session = Depends(get_db)):
         smart_reply = await control_smart_home("sleep_mode")
 
     if smart_reply:
-        # Save and return immediately if it's a direct command
         bot_msg = ChatMessage(sender="bot", content=smart_reply)
         db.add(bot_msg)
         db.commit()
         return {"response": smart_reply}
 
-    # Auto-expense check
+    # 4. Auto-expense check
     check_for_expenses(request.prompt, db)
 
-    # Enhance prompt if it's a system command
+    # 5. Process with AI (Gemini)
     prompt = request.prompt
     if "[SYSTEM_COMMAND]" in prompt:
-        prompt = f"System Command received: {prompt}. Please acknowledge this action as Olivia, the elite assistant, and confirm it's being handled. Keep it brief."
+        prompt = f"System Command received: {prompt}. Please acknowledge as Olivia."
 
     for attempt in range(max_retries):
         try:
@@ -162,7 +186,8 @@ async def chat_endpoint(request: ChatRequest, db: Session = Depends(get_db)):
                 continue
             return {"response": "Sir, මගේ Quota එක මේ වෙලාවේ ඉවරයි. කරුණාකර විනාඩියකින් ආයේ උත්සාහ කරන්න."}
     
-    return {"response": "System busy. Please try again shortly."}
+    return {"response": "System busy."}
+
 
 @app.get("/chat/history")
 async def get_chat_history(db: Session = Depends(get_db)):
