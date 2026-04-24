@@ -376,5 +376,76 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    // --- ADVANCED GEOFENCING ---
+    const HOME_LOCATIONS = {
+        dubai: { lat: 25.2048, lon: 55.2708, radius: 500 }, // Example Dubai coords
+        sl: { lat: 6.9271, lon: 79.8612, radius: 500 }      // Example SL coords
+    };
+
+    function checkGeofencing(pos) {
+        const { latitude, longitude } = pos.coords;
+        for (const [name, loc] of Object.entries(HOME_LOCATIONS)) {
+            const dist = calculateDistance(latitude, longitude, loc.lat, loc.lon);
+            if (dist < loc.radius) {
+                console.log(`Arrived at ${name}! Triggering welcome scene...`);
+                window.triggerAction(`arrived_${name}`);
+            }
+        }
+    }
+
+    function calculateDistance(lat1, lon1, lat2, lon2) {
+        const R = 6371e3; // metres
+        const φ1 = lat1 * Math.PI/180;
+        const φ2 = lat2 * Math.PI/180;
+        const Δφ = (lat2-lat1) * Math.PI/180;
+        const Δλ = (lon2-lon1) * Math.PI/180;
+        const a = Math.sin(Δφ/2) * Math.sin(Δφ/2) +
+                  Math.cos(φ1) * Math.cos(φ2) *
+                  Math.sin(Δλ/2) * Math.sin(Δλ/2);
+        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+        return R * c;
+    }
+
+    if ("geolocation" in navigator) {
+        navigator.geolocation.watchPosition(checkGeofencing);
+    }
+
+    // --- WAKE WORD DETECTION (Hey Olivia) ---
+    let isWakeWordActive = false;
+    function initWakeWord() {
+        if (!('webkitSpeechRecognition' in window)) return;
+        const wakeWordRecognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+        wakeWordRecognition.continuous = true;
+        wakeWordRecognition.interimResults = true;
+        wakeWordRecognition.lang = 'en-US';
+
+        wakeWordRecognition.onresult = (event) => {
+            const transcript = Array.from(event.results)
+                .map(result => result[0])
+                .map(result => result.transcript)
+                .join('').toLowerCase();
+
+            if (transcript.includes('hey olivia') || transcript.includes('olivia')) {
+                console.log("Wake word detected!");
+                wakeWordRecognition.stop(); // Stop wake listener
+                globalMicBtn.click(); // Trigger main mic
+            }
+        };
+
+        wakeWordRecognition.onend = () => {
+            if (!isWakeWordActive) wakeWordRecognition.start();
+        };
+
+        wakeWordRecognition.start();
+    }
+    
+    // Start wake word after first user interaction (browser requirement)
+    document.addEventListener('click', () => {
+        if (!isWakeWordActive) {
+            initWakeWord();
+            isWakeWordActive = true;
+        }
+    }, { once: true });
+
     console.log("Olivia 2.0 System Online.");
 });
