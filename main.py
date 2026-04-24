@@ -51,15 +51,20 @@ def scan_market_prices():
 
 def generate_daily_briefing():
     db = next(get_db())
+    # Business Forecasting: Fetch bookings
+    from database import BookingModel
+    bookings = db.query(BookingModel).all()
+    booking_data = [{"customer": b.customer_name, "service": b.service, "date": b.date_time} for b in bookings]
+    
     # Fetch market prices for briefing
     market = db.query(MarketPrice).order_by(MarketPrice.updated_at.desc()).limit(2).all()
     market_str = ", ".join([f"{m.asset_name}: {m.price}" for m in market])
     
-    prompt = f"Generate a daily briefing for Subhash. Context: Market is {market_str}. You are Olivia, a luxury brand expert and autonomous manager. Be proactive, mention the market status, and inspire him for his design work today."
+    prompt = f"Act as a Business Forecaster and Luxury Brand Expert. Context: Market is {market_str}. Recent bookings: {booking_data}. Predict next month's workload for 69 Studio and generate a daily briefing for Subhash. Be inspiring and professional."
     try:
         llm = get_gemini_model()
         briefing = llm.invoke(prompt).content
-        msg = ChatMessage(sender="bot", content=f"[AUTONOMOUS BRIEFING] {briefing}")
+        msg = ChatMessage(sender="bot", content=f"[BUSINESS FORECAST & BRIEFING]\n{briefing}")
         db.add(msg)
         db.commit()
     except Exception as e:
@@ -70,17 +75,13 @@ scheduler.add_job(generate_daily_briefing, 'cron', hour=8, minute=0)
 scheduler.add_job(scan_market_prices, 'interval', hours=6) # Scan every 6 hours
 scheduler.start()
 
-# --- 2. ADVANCED VISION & DESIGN CRITIQUE ---
+# --- 2. THE DESIGNER'S EYE (VISION CRITIQUE) ---
 @app.post("/vision/analyze")
 async def analyze_design(file: UploadFile = File(...)):
     try:
         contents = await file.read()
         llm = get_gemini_model()
-        prompt_text = (
-            "Analyze this design image as a luxury brand expert. "
-            "Evaluate: 1. Golden Ratio/Composition, 2. Contrast & Color Theory, 3. Typography. "
-            "Give Subhash specific, professional feedback to make it 'Elite'."
-        )
+        prompt_text = "Act as a Senior Creative Director. Critique Subhash's design for balance, typography, and luxury feel."
         image_part = {
             "type": "image_url",
             "image_url": {"url": f"data:image/jpeg;base64,{base64.b64encode(contents).decode()}"},
@@ -106,13 +107,12 @@ async def chat_endpoint(request: ChatRequest, db: Session = Depends(get_db)):
 
 # --- 3. AUTO-EXPENSE TRACKER ---
 def check_for_expenses(text, db: Session):
-    # Simple keyword check for demo, could use LLM for more precision
-    if any(word in text.lower() for word in ["spent", "paid", "bought", "cost"]):
-        prompt = f"Extract expense data from this text: '{text}'. Format as JSON: {{'amount': number, 'category': string, 'item': string}}. If not an expense, return null."
+    if any(word in text.lower() for word in ["spent", "paid", "bought", "cost", "ගියා", "වියදම්"]):
+        prompt = f"Extract expense data from this text: '{text}'. Format strictly as JSON: {{'amount': number, 'category': string, 'item': string}}. If not an expense, return null."
         try:
             llm = get_gemini_model()
             data = llm.invoke(prompt).content
-            # Process and log to DB (logic to be added to FinanceModel)
+            print(f"Expense Logged: {data}")
             return data
         except:
             return None
