@@ -1,6 +1,55 @@
 // --- Global Functions for HTML calls ---
 const CORRECT_KEY = "69studio"; // Modern Elite Access Key
 
+window.triggerAction = async function(action) {
+    console.log("Triggering Action:", action);
+    const aiOrb = document.getElementById('aiOrb');
+    const statusText = document.querySelector('.ai-status-text');
+    
+    if (aiOrb) aiOrb.classList.add('speaking-anim');
+    if (statusText) statusText.innerText = "Initializing " + action.replace('_', ' ') + "...";
+
+    // Call chat with the command
+    try {
+        const response = await fetch("http://84.235.242.22:8000/chat", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ prompt: `[SYSTEM_COMMAND] Trigger action: ${action}`, model_type: "gemini" })
+        });
+        const data = await response.json();
+        // Move to Comms view to see the response
+        window.appSwitchView('chat');
+        // The message will be added by the chat logic if we can hook it
+        // For now, just alert or add a manual message
+        if (window.addChatMessage) window.addChatMessage(data.response, 'bot');
+    } catch (e) {
+        console.error("Action error:", e);
+    } finally {
+        setTimeout(() => {
+            if (aiOrb) aiOrb.classList.remove('speaking-anim');
+            if (statusText) statusText.innerText = "Standby";
+        }, 1500);
+    }
+};
+
+window.toggleAutomation = async function(device, el) {
+    const isActive = el.classList.contains('active');
+    const newState = !isActive;
+    el.classList.toggle('active');
+    
+    console.log(`Toggling ${device} to ${newState ? 'ON' : 'OFF'}`);
+    
+    try {
+        await fetch("http://84.235.242.22:8000/chat", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ prompt: `[SYSTEM_COMMAND] ${device} set to ${newState ? 'ON' : 'OFF'}`, model_type: "gemini" })
+        });
+    } catch (e) {
+        console.error("Toggle error:", e);
+    }
+};
+
 function handleLogin() {
     const accessKey = document.getElementById('accessKey').value;
     const btn = document.querySelector('.login-btn');
@@ -195,6 +244,9 @@ document.addEventListener('DOMContentLoaded', () => {
         chatMessages.appendChild(msgDiv);
         chatMessages.scrollTop = chatMessages.scrollHeight;
     }
+    
+    // Expose globally
+    window.addChatMessage = addMessage;
 
     if (chatSendBtn && chatInput) {
         chatSendBtn.addEventListener('click', sendMessage);

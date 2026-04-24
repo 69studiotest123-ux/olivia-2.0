@@ -46,11 +46,16 @@ async def chat_endpoint(request: ChatRequest):
     max_retries = 3
     retry_delay = 2 # seconds
 
+    # Enhance prompt if it's a system command
+    prompt = request.prompt
+    if "[SYSTEM_COMMAND]" in prompt:
+        prompt = f"System Command received: {prompt}. Please acknowledge this action as Olivia, the elite assistant, and confirm it's being handled (e.g. 'Morning Brief initialized', 'Lights adjusted'). Keep it brief and professional."
+
     for attempt in range(max_retries):
         try:
             if request.model_type == "gemini":
                 llm = get_gemini_model()
-                response = llm.invoke(request.prompt).content
+                response = llm.invoke(prompt).content
                 return {"response": response}
         except Exception as e:
             error_str = str(e)

@@ -444,10 +444,10 @@
                         </div>
                         <div class="glass-card intel-section">
                             <h3><i class="fa-solid fa-lock"></i> Lock Controls</h3>
-                            <div class="setting-item"><div class="setting-info"><h4>Front Door Lock</h4><p>Deadbolt — Active</p></div><div class="cyber-toggle active" onclick="this.classList.toggle('active')"></div></div>
-                            <div class="setting-item"><div class="setting-info"><h4>Studio Door</h4><p>Electronic lock</p></div><div class="cyber-toggle active" onclick="this.classList.toggle('active')"></div></div>
-                            <div class="setting-item"><div class="setting-info"><h4>Garage Gate</h4><p>Remote-controlled</p></div><div class="cyber-toggle" onclick="this.classList.toggle('active')"></div></div>
-                            <div class="setting-item"><div class="setting-info"><h4>Motion Alerts</h4><p>Push notifications</p></div><div class="cyber-toggle active" onclick="this.classList.toggle('active')"></div></div>
+                            <div class="setting-item"><div class="setting-info"><h4>Front Door Lock</h4><p>Deadbolt — Active</p></div><div class="cyber-toggle active" onclick="window.toggleAutomation('front_door', this)"></div></div>
+                            <div class="setting-item"><div class="setting-info"><h4>Studio Door</h4><p>Electronic lock</p></div><div class="cyber-toggle active" onclick="window.toggleAutomation('studio_door', this)"></div></div>
+                            <div class="setting-item"><div class="setting-info"><h4>Garage Gate</h4><p>Remote-controlled</p></div><div class="cyber-toggle" onclick="window.toggleAutomation('garage_gate', this)"></div></div>
+                            <div class="setting-item"><div class="setting-info"><h4>Motion Alerts</h4><p>Push notifications</p></div><div class="cyber-toggle active" onclick="window.toggleAutomation('motion_alerts', this)"></div></div>
                             <div class="setting-item"><div class="setting-info"><h4>Night Vision Mode</h4><p>Auto-enable after 8PM</p></div><div class="cyber-toggle active" onclick="this.classList.toggle('active')"></div></div>
                         </div>
                     </div>
