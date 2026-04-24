@@ -181,6 +181,7 @@ body {
     display: flex;
     flex-direction: column;
     position: relative;
+    overflow-y: auto; /* Allow scrolling for PC UI elements */
 }
 
 .top-header {
@@ -1547,3 +1548,52 @@ body {
     }
 }
 
+/* --- LAYOUT FIXES FOR MOBILE OVERLAPS --- */
+@media (max-width: 768px) {
+    .main-content {
+        padding-top: 70px !important;
+    }
+    .chat-container {
+        padding-bottom: 90px;
+    }
+    .top-header {
+        padding: 20px 20px 10px 20px !important;
+    }
+}
+.camera-feed-container {
+    width: 100%;
+    height: 200px;
+    background: #000;
+    border-radius: 10px;
+    margin-top: 15px;
+    display: none;
+    border: 1px solid var(--glass-border);
+    overflow: hidden;
+    position: relative;
+}
+.camera-feed-container img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+.camera-input-group {
+    display: flex;
+    gap: 10px;
+    margin-top: 10px;
+}
+.camera-input-group input {
+    flex: 1;
+    padding: 8px 12px;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid var(--glass-border);
+    color: white;
+    border-radius: 8px;
+}
+.camera-input-group button {
+    padding: 8px 15px;
+    background: var(--primary);
+    border: none;
+    color: white;
+    border-radius: 8px;
+    cursor: pointer;
+}
