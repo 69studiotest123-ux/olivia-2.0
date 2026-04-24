@@ -78,11 +78,8 @@
                 <li class="nav-item active" data-target="dashboard"><i class="fa-solid fa-border-all"></i><span>Dashboard</span></li>
                 <li class="nav-item" data-target="chat"><i class="fa-solid fa-message"></i><span>Comms</span></li>
                 <li class="nav-item" data-target="studio"><i class="fa-solid fa-camera"></i><span>69 Studio</span></li>
-                <li class="nav-item" data-target="smarthome"><i class="fa-solid fa-house-signal"></i><span>Smart Home</span></li>
-                <li class="nav-item" data-target="finance"><i class="fa-solid fa-wallet"></i><span>Finance</span></li>
+                <li class="nav-item" data-target="smarthome"><i class="fa-solid fa-house-signal"></i><span>Automation</span></li>
                 <li class="nav-item" data-target="security"><i class="fa-solid fa-shield-halved"></i><span>Security</span></li>
-                <li class="nav-item" data-target="schedule"><i class="fa-solid fa-calendar-days"></i><span>Schedule</span></li>
-                <li class="nav-item" data-target="intel"><i class="fa-solid fa-brain"></i><span>Intel</span></li>
             </ul>
             
             <div class="user-profile">
@@ -134,14 +131,22 @@
 
                     <!-- Quick Action Cards -->
                     <div class="quick-actions">
-                        <div class="glass-card action-card" onclick="triggerAction('spotify')"><i class="fa-brands fa-spotify spotify-color"></i><h4>Focus Music</h4><p>Deep work playlist</p></div>
-                        <div class="glass-card action-card" onclick="triggerAction('work_mode')"><i class="fa-solid fa-code"></i><h4>Dev Mode</h4><p>Launch IDE &amp; Tools</p></div>
-                        <div class="glass-card action-card" onclick="switchToView('studio')"><i class="fa-solid fa-camera"></i><h4>New Booking</h4><p>69 Studio Client</p></div>
-                        <div class="glass-card action-card" onclick="triggerAction('studio_lights')"><i class="fa-solid fa-lightbulb text-yellow"></i><h4>Studio Lights</h4><p>Toggle ON/OFF</p></div>
-                        <div class="glass-card action-card" onclick="triggerAction('morning_brief')"><i class="fa-solid fa-sun text-yellow"></i><h4>Morning Brief</h4><p>News &amp; Schedule</p></div>
-                        <div class="glass-card action-card" onclick="triggerAction('night_lockdown')"><i class="fa-solid fa-moon" style="color:#818cf8"></i><h4>Night Mode</h4><p>Lock &amp; dim all</p></div>
-                        <div class="glass-card action-card" onclick="switchToView('finance')"><i class="fa-solid fa-chart-line" style="color:#10b981"></i><h4>Revenue</h4><p>Today's earnings</p></div>
-                        <div class="glass-card action-card" onclick="triggerAction('pc_shutdown')" style="border-color:var(--primary)"><i class="fa-solid fa-power-off" style="color:var(--primary)"></i><h4>Kill Switch</h4><p>Remote PC shutdown</p></div>
+                        <div class="action-card" onclick="triggerAction('morning_brief')">
+                            <div class="action-icon brief-icon"><i class="fa-solid fa-sun"></i></div>
+                            <div class="action-info"><h4>Morning Brief</h4><p>Calendar & News</p></div>
+                        </div>
+                        <div class="action-card" onclick="triggerAction('deep_work')">
+                            <div class="action-icon work-icon"><i class="fa-solid fa-code"></i></div>
+                            <div class="action-info"><h4>Deep Work</h4><p>Spotify & VS Code</p></div>
+                        </div>
+                        <div class="action-card" onclick="triggerAction('studio_mode')">
+                            <div class="action-icon studio-icon"><i class="fa-solid fa-camera"></i></div>
+                            <div class="action-info"><h4>Studio Mode</h4><p>Figma & Spotify</p></div>
+                        </div>
+                        <div class="action-card" onclick="triggerAction('night_lockdown')">
+                            <div class="action-icon lock-icon"><i class="fa-solid fa-moon"></i></div>
+                            <div class="action-info"><h4>Night Protocol</h4><p>Lock all systems</p></div>
+                        </div>
                     </div>
                 </div>
 
@@ -487,10 +492,7 @@
         <div class="mobile-nav-item" onclick="switchToView('chat')" data-target="chat"><i class="fa-solid fa-message"></i><span>Comms</span></div>
         <div class="mobile-nav-item" onclick="switchToView('studio')" data-target="studio"><i class="fa-solid fa-camera"></i><span>Studio</span></div>
         <div class="mobile-nav-item" onclick="switchToView('smarthome')" data-target="smarthome"><i class="fa-solid fa-house-signal"></i><span>Auto</span></div>
-        <div class="mobile-nav-item" onclick="switchToView('finance')" data-target="finance"><i class="fa-solid fa-wallet"></i><span>Finance</span></div>
         <div class="mobile-nav-item" onclick="switchToView('security')" data-target="security"><i class="fa-solid fa-shield-halved"></i><span>Security</span></div>
-        <div class="mobile-nav-item" onclick="switchToView('schedule')" data-target="schedule"><i class="fa-solid fa-calendar-days"></i><span>Schedule</span></div>
-        <div class="mobile-nav-item" onclick="switchToView('intel')" data-target="intel"><i class="fa-solid fa-brain"></i><span>Intel</span></div>
     </nav>
 
     <!-- Floating Global Mic Button -->
