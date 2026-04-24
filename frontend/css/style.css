@@ -1111,50 +1111,50 @@ body {
         font-size: 0.78rem;
     }
 
-    /* glass card border radius smaller on mobile */
-    .glass-card {
-        border-radius: 18px;
-    }
-
     /* Smart Home span fix */
     [style*="grid-column: span 2"] {
         grid-column: span 1 !important;
     }
+
+    /* Force 1-column for most grids on small screens */
+    .stats-grid, .quick-actions, .finance-kpi-grid, .system-status-grid {
+        grid-template-columns: 1fr !important;
+    }
+
+    .views-container {
+        padding: 15px 15px 120px; /* Extra bottom padding to avoid mic overlap */
+    }
 }
 
-/* ================================================
-   SMALL MOBILE  ≤ 400px
-   ================================================ */
 @media (max-width: 400px) {
-    .quick-actions {
-        grid-template-columns: repeat(2, 1fr);
-        gap: 10px;
+    .quick-actions, .stats-grid, .finance-kpi-grid {
+        grid-template-columns: 1fr !important;
     }
 
     .action-card {
-        padding: 14px 12px;
-    }
-
-    .ai-orb {
-        width: 150px;
-        height: 150px;
-    }
-
-    .olivia-avatar-main {
-        width: 75px;
-        height: 75px;
-    }
-
-    .system-status-grid {
-        grid-template-columns: repeat(2, 1fr);
+        padding: 16px;
     }
 
     .mobile-nav-item {
+        min-width: 75px;
+        padding: 8px 5px;
         font-size: 0.6rem;
     }
 
+    .mobile-nav-item span {
+        display: none; /* Hide labels on very small screens to avoid squashing icons */
+    }
+
     .mobile-nav-item i {
-        font-size: 1.1rem;
+        font-size: 1.3rem;
+        margin-bottom: 0;
+    }
+
+    .global-mic-btn {
+        bottom: 85px;
+        right: 20px;
+        width: 50px;
+        height: 50px;
     }
 }
 /* --- Finance View Styles --- */
