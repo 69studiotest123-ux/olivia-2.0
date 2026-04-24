@@ -526,35 +526,6 @@ body {
 .badge.pending { background: rgba(245, 158, 11, 0.1); color: #f59e0b; }
 .badge.confirmed { background: rgba(16, 185, 129, 0.1); color: #10b981; }
 
-/* Global Mic Button */
-.global-mic-btn {
-    position: fixed;
-    bottom: 40px;
-    right: 40px;
-    width: 65px;
-    height: 65px;
-    border-radius: 50%;
-    background: var(--primary);
-    border: none;
-    color: white;
-    font-size: 1.5rem;
-    cursor: pointer;
-    box-shadow: 0 10px 30px var(--primary-glow);
-    z-index: 1000;
-    transition: 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-}
-
-.global-mic-btn:hover {
-    transform: scale(1.1);
-}
-
-.mic-ripple {
-    position: absolute;
-    inset: 0;
-    border-radius: 50%;
-    border: 2px solid var(--primary);
-    animation: pulse 2s infinite;
-}
 
 @keyframes pulse {
     0% { transform: scale(1); opacity: 1; }
@@ -1489,20 +1460,20 @@ body {
     }
 }
 
-/* --- Global Mic Button --- */
+/* --- Global Mic Button (Final Consolidated Version) --- */
 .global-mic-btn {
     position: fixed;
     bottom: 30px;
     right: 30px;
-    width: 65px;
-    height: 65px;
+    width: 60px;
+    height: 60px;
     border-radius: 50%;
     background: var(--primary);
     border: none;
     color: #fff;
-    font-size: 1.5rem;
+    font-size: 1.4rem;
     cursor: pointer;
-    z-index: 600;
+    z-index: 1000;
     display: grid;
     place-items: center;
     padding: 0 !important;
@@ -1517,6 +1488,8 @@ body {
     padding: 0 !important;
     display: block;
     line-height: 1;
+    position: relative;
+    z-index: 2;
 }
 
 .global-mic-btn:active {
@@ -1532,8 +1505,27 @@ body {
     border-radius: 50%;
     background: var(--primary);
     opacity: 0.4;
-    z-index: -1;
+    z-index: 1;
     pointer-events: none;
+}
+
+.global-mic-btn.speaking-anim .mic-ripple {
+    animation: micRipple 1.5s infinite;
+}
+
+@keyframes micRipple {
+    0% { transform: scale(1); opacity: 0.4; }
+    100% { transform: scale(2.5); opacity: 0; }
+}
+
+@media (max-width: 768px) {
+    .global-mic-btn {
+        bottom: 85px;
+        right: 20px;
+        width: 55px;
+        height: 55px;
+        font-size: 1.2rem;
+    }
 }
 
 .global-mic-btn.speaking-anim .mic-ripple {
