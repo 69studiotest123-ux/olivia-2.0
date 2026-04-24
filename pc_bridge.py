@@ -2,9 +2,8 @@ import time
 import requests
 import os
 
-# CLOUD_URL should be the URL of your deployed Olivia backend (e.g. Render/Heroku URL)
-# For local testing, use http://localhost:8000
-CLOUD_URL = os.getenv("CLOUD_URL", "http://localhost:8000")
+# CLOUD_URL should be the URL of your deployed Olivia backend (e.g. Render/Heroku/Oracle URL)
+CLOUD_URL = os.getenv("CLOUD_URL", "http://84.235.242.22:8000")
 
 def poll_cloud_commands():
     print(f"📡 Olivia PC Bridge active. Polling {CLOUD_URL} for commands...")

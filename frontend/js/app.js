@@ -46,7 +46,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         try {
             // Call Python Backend
-            const response = await fetch("http://localhost:8000/chat", {
+            const response = await fetch("http://84.235.242.22:8000/chat", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ prompt: text, model_type: "gemini" })
@@ -107,8 +107,8 @@ document.addEventListener('DOMContentLoaded', () => {
 async function triggerAction(actionName) {
     console.log(`Triggering action: ${actionName}`);
     try {
-        await fetch(`http://localhost:8000/control/device?action=${actionName}&device=pc`);
-        alert(`${actionName} command sent to host PC.`);
+        await fetch(`http://84.235.242.22:8000/control/scene/${actionName}`);
+        alert(`${actionName} command sent to Cloud Brain.`);
     } catch(e) {
         alert("Failed to send command. Ensure backend is running.");
     }
