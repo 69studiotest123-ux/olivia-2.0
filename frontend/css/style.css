@@ -1483,10 +1483,64 @@ body {
     to { opacity: 1; transform: translateY(0); }
 }
 
-/* Mobile specific for login */
 @media (max-width: 480px) {
     .login-card {
         padding: 40px 25px;
+    }
+}
+
+/* --- Global Mic Button --- */
+.global-mic-btn {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    width: 65px;
+    height: 65px;
+    border-radius: 50%;
+    background: var(--primary);
+    border: none;
+    color: #fff;
+    font-size: 1.5rem;
+    cursor: pointer;
+    z-index: 600;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 10px 30px var(--primary-glow);
+    transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    -webkit-tap-highlight-color: transparent;
+}
+
+.global-mic-btn:active {
+    transform: scale(0.9);
+}
+
+.mic-ripple {
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    background: var(--primary);
+    opacity: 0.4;
+    z-index: -1;
+    pointer-events: none;
+}
+
+.global-mic-btn.speaking-anim .mic-ripple {
+    animation: micRipple 1.5s infinite;
+}
+
+@keyframes micRipple {
+    0% { transform: scale(1); opacity: 0.4; }
+    100% { transform: scale(2.5); opacity: 0; }
+}
+
+@media (max-width: 768px) {
+    .global-mic-btn {
+        bottom: 90px;
+        right: 25px;
+        width: 55px;
+        height: 55px;
+        font-size: 1.2rem;
     }
 }
 
