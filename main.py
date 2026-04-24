@@ -38,10 +38,77 @@ def get_gemini_model():
     api_key = os.getenv("GOOGLE_API_KEY", "YOUR_GEMINI_KEY")
     return ChatGoogleGenerativeAI(model="gemini-2.0-flash", api_key=api_key)
 
+# --- 1. PROACTIVE BRIEFING LOGIC ---
+def generate_daily_briefing():
+    db = next(get_db())
+    # In a real app, fetch weather, news, and calendar here
+    prompt = "Generate a daily briefing for Subhash. You are Olivia, a luxury brand expert. Include a motivational quote, current top news in photography, and remind him of his elite status. Keep it professional and inspiring."
+    try:
+        llm = get_gemini_model()
+        briefing = llm.invoke(prompt).content
+        # Save to chat history as a bot message
+        msg = ChatMessage(sender="bot", content=f"[PROACTIVE BRIEFING] {briefing}")
+        db.add(msg)
+        db.commit()
+        print("Daily briefing generated.")
+    except Exception as e:
+        print(f"Briefing error: {e}")
+
+scheduler = BackgroundScheduler()
+scheduler.add_job(generate_daily_briefing, 'cron', hour=8, minute=0)
+scheduler.start()
+
+# --- 2. VISION CRITIQUE LOGIC ---
+@app.post("/vision/analyze")
+async def analyze_design(file: UploadFile = File(...)):
+    try:
+        contents = await file.read()
+        llm = get_gemini_model()
+        # Using HumanMessage with image for LangChain Gemini
+        image_part = {
+            "type": "image_url",
+            "image_url": {"url": f"data:image/jpeg;base64,{base64.b64encode(contents).decode()}"},
+        }
+        text_part = {"type": "text", "text": "Analyze this image as a luxury brand expert. Give Subhash creative advice for 69 Studio."}
+        message = HumanMessage(content=[text_part, image_part])
+        response = llm.invoke([message]).content
+        return {"response": response}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+# --- 3. AUTO-EXPENSE TRACKER ---
+def check_for_expenses(text, db: Session):
+    # Simple keyword check for demo, could use LLM for more precision
+    if any(word in text.lower() for word in ["spent", "paid", "bought", "cost"]):
+        prompt = f"Extract expense data from this text: '{text}'. Format as JSON: {{'amount': number, 'category': string, 'item': string}}. If not an expense, return null."
+        try:
+            llm = get_gemini_model()
+            data = llm.invoke(prompt).content
+            # Process and log to DB (logic to be added to FinanceModel)
+            return data
+        except:
+            return None
+    return None
+
 # --- Chat Endpoint with Retry Logic ---
 class ChatRequest(BaseModel):
     prompt: str
     model_type: str = "gemini"
+
+# --- 4. SMART HOME HYPER-SYNC MODULE ---
+async def control_smart_home(scene: str):
+    ifttt_key = os.getenv("IFTTT_KEY", "YOUR_IFTTT_KEY")
+    try:
+        if scene == "studio_mode":
+            # Trigger IFTTT Webhook
+            requests.post(f"https://maker.ifttt.com/trigger/studio_lights_on/with/key/{ifttt_key}")
+            return "සර්, Studio Mode එක active කළා. ලොකු design එකක් කරමු!"
+        elif scene == "sleep_mode":
+            requests.post(f"https://maker.ifttt.com/trigger/all_lights_off/with/key/{ifttt_key}")
+            return "Good night Sir! ඔක්කොම lights off කළා."
+    except Exception as e:
+        print(f"Smart Home error: {e}")
+    return None
 
 @app.post("/chat")
 async def chat_endpoint(request: ChatRequest, db: Session = Depends(get_db)):
@@ -49,15 +116,32 @@ async def chat_endpoint(request: ChatRequest, db: Session = Depends(get_db)):
     max_retries = 3
     retry_delay = 2 # seconds
 
-    # 1. Save user message to DB
+    # Save user message
     user_msg = ChatMessage(sender="user", content=request.prompt)
     db.add(user_msg)
     db.commit()
 
+    # Smart Home Intent Check
+    smart_reply = None
+    if any(word in request.prompt.lower() for word in ["වැඩ කරන්න", "design mode", "studio mode"]):
+        smart_reply = await control_smart_home("studio_mode")
+    elif any(word in request.prompt.lower() for word in ["sleep mode", "නිදාගන්න", "lights off"]):
+        smart_reply = await control_smart_home("sleep_mode")
+
+    if smart_reply:
+        # Save and return immediately if it's a direct command
+        bot_msg = ChatMessage(sender="bot", content=smart_reply)
+        db.add(bot_msg)
+        db.commit()
+        return {"response": smart_reply}
+
+    # Auto-expense check
+    check_for_expenses(request.prompt, db)
+
     # Enhance prompt if it's a system command
     prompt = request.prompt
     if "[SYSTEM_COMMAND]" in prompt:
-        prompt = f"System Command received: {prompt}. Please acknowledge this action as Olivia, the elite assistant, and confirm it's being handled (e.g. 'Morning Brief initialized', 'Lights adjusted'). Keep it brief and professional."
+        prompt = f"System Command received: {prompt}. Please acknowledge this action as Olivia, the elite assistant, and confirm it's being handled. Keep it brief."
 
     for attempt in range(max_retries):
         try:
@@ -65,7 +149,7 @@ async def chat_endpoint(request: ChatRequest, db: Session = Depends(get_db)):
                 llm = get_gemini_model()
                 response = llm.invoke(prompt).content
                 
-                # 2. Save bot response to DB
+                # Save bot response
                 bot_msg = ChatMessage(sender="bot", content=response)
                 db.add(bot_msg)
                 db.commit()
@@ -73,16 +157,10 @@ async def chat_endpoint(request: ChatRequest, db: Session = Depends(get_db)):
                 return {"response": response}
         except Exception as e:
             error_str = str(e)
-            if "429" in error_str or "RESOURCE_EXHAUSTED" in error_str:
-                if attempt < max_retries - 1:
-                    print(f"Quota exceeded. Retrying in {retry_delay}s... (Attempt {attempt+1})")
-                    time.sleep(retry_delay)
-                    retry_delay *= 2 # Exponential backoff
-                    continue
-                else:
-                    return {"response": "Sir, මගේ Quota එක මේ වෙලාවේ ඉවරයි. කරුණාකර විනාඩියකින් ආයේ උත්සාහ කරන්න."}
-            else:
-                return {"response": f"Error: {error_str}"}
+            if "429" in error_str and attempt < max_retries - 1:
+                time.sleep(retry_delay * (attempt + 1))
+                continue
+            return {"response": "Sir, මගේ Quota එක මේ වෙලාවේ ඉවරයි. කරුණාකර විනාඩියකින් ආයේ උත්සාහ කරන්න."}
     
     return {"response": "System busy. Please try again shortly."}
 
