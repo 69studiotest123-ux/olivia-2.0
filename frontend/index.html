@@ -240,7 +240,19 @@
                         <div class="glass-card intel-section">
                             <h3><i class="fa-solid fa-plug"></i> Connected Hardware</h3>
                             <div class="setting-item"><div class="setting-info"><h4>Front Door Lock</h4><p>Main entrance security</p></div><div class="cyber-toggle active" onclick="this.classList.toggle('active')"></div></div>
-                            <div class="setting-item"><div class="setting-info"><h4>CCTV Cameras</h4><p>Motion detection enabled</p></div><div class="cyber-toggle active" onclick="this.classList.toggle('active')"></div></div>
+                            <div class="setting-item" style="flex-direction: column; align-items: flex-start;">
+                                <div style="display: flex; justify-content: space-between; width: 100%;">
+                                    <div class="setting-info"><h4>IP CCTV Camera</h4><p>Live remote feed</p></div>
+                                    <div class="cyber-toggle active" onclick="this.classList.toggle('active')"></div>
+                                </div>
+                                <div class="camera-input-group" style="width: 100%;">
+                                    <input type="text" id="cameraIpInput" placeholder="Enter Camera IP (e.g., http://192.168.1.100/cam-hi.jpg)">
+                                    <button onclick="window.connectCamera()"><i class="fa-solid fa-link"></i> Connect</button>
+                                </div>
+                                <div class="camera-feed-container" id="cameraFeedBox">
+                                    <img id="liveCameraFeed" src="" alt="Camera Feed Offline">
+                                </div>
+                            </div>
                             <div class="setting-item"><div class="setting-info"><h4>Living Room TV</h4><p>Currently: Netflix</p></div><div class="cyber-toggle" onclick="this.classList.toggle('active')"></div></div>
                             <div class="setting-item"><div class="setting-info"><h4>Studio Main Lights</h4><p>69 Studio — 3 bulbs</p></div><div class="cyber-toggle active" onclick="this.classList.toggle('active')"></div></div>
                             <div class="setting-item"><div class="setting-info"><h4>Garden Lights</h4><p>Outdoor perimeter</p></div><div class="cyber-toggle" onclick="this.classList.toggle('active')"></div></div>

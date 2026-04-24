@@ -447,5 +447,20 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }, { once: true });
 
+    // --- IP CAMERA INTEGRATION ---
+    window.connectCamera = () => {
+        const ipInput = document.getElementById('cameraIpInput').value;
+        const feedBox = document.getElementById('cameraFeedBox');
+        const liveFeed = document.getElementById('liveCameraFeed');
+        
+        if (ipInput) {
+            liveFeed.src = ipInput;
+            feedBox.style.display = 'block';
+            window.speakResponse("Connecting to remote camera feed sir.");
+        } else {
+            alert("Please enter a valid Camera IP URL.");
+        }
+    };
+
     console.log("Olivia 2.0 System Online.");
 });
