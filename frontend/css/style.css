@@ -678,3 +678,43 @@ body {
 
 .val.good { color: var(--accent-green); }
 .val.warn { color: #f59e0b; }
+
+/* Persona Selector */
+.persona-selector {
+    display: flex;
+    gap: 15px;
+    margin-top: 10px;
+}
+
+.persona-btn {
+    flex: 1;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--glass-border);
+    padding: 15px;
+    border-radius: 12px;
+    color: var(--text-muted);
+    font-family: var(--font-main);
+    font-weight: 600;
+    cursor: pointer;
+    transition: 0.3s;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+}
+
+.persona-btn i {
+    font-size: 1.5rem;
+}
+
+.persona-btn:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+}
+
+.persona-btn.active {
+    background: rgba(255, 51, 68, 0.15);
+    border-color: var(--primary);
+    color: var(--primary);
+    box-shadow: 0 0 20px var(--primary-glow);
+}
