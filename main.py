@@ -17,6 +17,8 @@ from langchain_google_genai import ChatGoogleGenerativeAI
 from sqlalchemy.orm import Session
 from fastapi import Depends
 from database import get_db, ChatMessage
+from duckduckgo_search import DDGS
+import psutil
 
 app = FastAPI(title="Olivia Elite Core")
 
@@ -70,9 +72,23 @@ def generate_daily_briefing():
     except Exception as e:
         print(f"Briefing error: {e}")
 
+# --- CLOUD MONITORING MODULE ---
+def check_server_health():
+    db = next(get_db())
+    cpu_usage = psutil.cpu_percent(interval=1)
+    ram_usage = psutil.virtual_memory().percent
+    
+    if cpu_usage > 85 or ram_usage > 85:
+        alert_msg = f"⚠️ [CLOUD ALERT] Oracle Server Load High: CPU {cpu_usage}%, RAM {ram_usage}%"
+        msg = ChatMessage(sender="bot", content=alert_msg)
+        db.add(msg)
+        db.commit()
+        print(alert_msg)
+
 scheduler = BackgroundScheduler()
 scheduler.add_job(generate_daily_briefing, 'cron', hour=8, minute=0)
 scheduler.add_job(scan_market_prices, 'interval', hours=6) # Scan every 6 hours
+scheduler.add_job(check_server_health, 'interval', minutes=30) # Monitor every 30 mins
 scheduler.start()
 
 # --- 2. THE DESIGNER'S EYE (VISION CRITIQUE) ---
@@ -162,9 +178,21 @@ async def chat_endpoint(request: ChatRequest, db: Session = Depends(get_db)):
     # 4. Auto-expense check
     check_for_expenses(request.prompt, db)
 
-    # 5. Process with AI (Gemini)
+    # 5. NEXT LEVEL WEB RESEARCH AGENT
     prompt = request.prompt
+    if "search" in prompt.lower() or "news" in prompt.lower() or "හොයන්න" in prompt:
+        try:
+            print(f"🔍 Olivia is searching for: {prompt}")
+            with DDGS() as ddgs:
+                results = list(ddgs.text(prompt, max_results=3))
+            search_context = "\n".join([f"- {r['title']}: {r['body']}" for r in results])
+            prompt = f"User asked: {prompt}\nWeb Search Results:\n{search_context}\nProvide a concise and luxurious summary as Olivia."
+        except Exception as e:
+            print(f"Web search error: {e}")
+
+    # 6. Process with AI (Gemini)
     if "[SYSTEM_COMMAND]" in prompt:
+
         prompt = f"System Command received: {prompt}. Please acknowledge as Olivia."
 
     for attempt in range(max_retries):
