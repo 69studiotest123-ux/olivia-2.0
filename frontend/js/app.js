@@ -253,7 +253,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 body: JSON.stringify({ prompt: text, model_type: "gemini" })
             });
             const data = await response.json();
-            addMessage(data.response || "Error getting response", 'bot');
+            const botText = data.response || "Error getting response";
+            addMessage(botText, 'bot');
+            
+            // Speak the response aloud
+            if (window.speakResponse) window.speakResponse(botText);
+            
         } catch (error) {
             console.error("Backend error:", error);
             addMessage("Sir, I cannot reach the main server at the moment.", 'bot');
@@ -285,15 +290,88 @@ document.addEventListener('DOMContentLoaded', () => {
     const globalMicBtn = document.getElementById('globalMicBtn');
     const aiOrb = document.getElementById('aiOrb');
 
+    // --- Voice AI Engine ---
+    let recognition;
+    if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        recognition = new SpeechRecognition();
+        recognition.continuous = false;
+        recognition.interimResults = false;
+        recognition.lang = 'en-US';
+
+        recognition.onresult = (event) => {
+            const transcript = event.results[0][0].transcript;
+            console.log("Speech recognized:", transcript);
+            if (chatInput) {
+                chatInput.value = transcript;
+                sendMessage(); // Auto-send recognized text
+            }
+        };
+
+        recognition.onend = () => {
+            stopListeningUI();
+        };
+
+        recognition.onerror = (event) => {
+            console.error("Speech error:", event.error);
+            stopListeningUI();
+        };
+    }
+
+    function startListeningUI() {
+        const statusText = document.querySelector('.ai-status-text');
+        if (aiOrb) aiOrb.classList.add('speaking-anim');
+        if (statusText) statusText.innerText = "Listening...";
+        if (globalMicBtn) globalMicBtn.classList.add('active');
+    }
+
+    function stopListeningUI() {
+        const statusText = document.querySelector('.ai-status-text');
+        if (aiOrb) aiOrb.classList.remove('speaking-anim');
+        if (statusText) statusText.innerText = "Standby";
+        if (globalMicBtn) globalMicBtn.classList.remove('active');
+    }
+
+    // Text-to-Speech Response
+    window.speakResponse = function(text) {
+        if (!('speechSynthesis' in window)) return;
+        
+        // Stop any current speaking
+        window.speechSynthesis.cancel();
+        
+        const utterance = new SpeechSynthesisUtterance(text);
+        utterance.lang = 'en-US';
+        utterance.rate = 1.0;
+        utterance.pitch = 1.1; // Slightly higher for more female tone
+        
+        // Try to find a premium female voice
+        const voices = window.speechSynthesis.getVoices();
+        const preferredVoice = voices.find(v => 
+            v.name.includes('Google UK English Female') || 
+            v.name.includes('Samantha') || 
+            v.name.includes('Female')
+        );
+        if (preferredVoice) utterance.voice = preferredVoice;
+
+        window.speechSynthesis.speak(utterance);
+    };
+
     if (globalMicBtn) {
         globalMicBtn.addEventListener('click', () => {
-            const statusText = document.querySelector('.ai-status-text');
             if (aiOrb && aiOrb.classList.contains('speaking-anim')) {
-                aiOrb.classList.remove('speaking-anim');
-                if (statusText) statusText.innerText = "Standby";
+                if (recognition) recognition.stop();
+                stopListeningUI();
             } else {
-                if (aiOrb) aiOrb.classList.add('speaking-anim');
-                if (statusText) statusText.innerText = "Listening...";
+                if (recognition) {
+                    try {
+                        recognition.start();
+                        startListeningUI();
+                    } catch (e) {
+                        console.error("Mic start error:", e);
+                    }
+                } else {
+                    alert("Speech recognition not supported in this browser.");
+                }
             }
         });
     }
