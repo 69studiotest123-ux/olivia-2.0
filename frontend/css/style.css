@@ -1,14 +1,15 @@
 :root {
-    --primary: #ff3344;
-    --primary-glow: rgba(255, 51, 68, 0.45);
-    --bg: #07070a;
-    --sidebar-bg: rgba(15, 15, 20, 0.6);
-    --card-bg: rgba(20, 20, 25, 0.4);
+    --primary: #4B7BFF;
+    --primary-glow: rgba(75, 123, 255, 0.45);
+    --bg: #040A18;
+    --sidebar-bg: rgba(10, 16, 30, 0.6);
+    --card-bg: rgba(16, 24, 45, 0.4);
     --glass-border: rgba(255, 255, 255, 0.08);
     --text-main: #ffffff;
-    --text-muted: #9ca3af;
-    --accent-blue: #0ea5e9;
-    --accent-green: #10b981;
+    --text-muted: #8A9BB5;
+    --accent-blue: #A6D1E6;
+    --accent-green: #4ADE80;
+    --accent-gold: #D8B888;
     --font-main: 'Outfit', sans-serif;
 }
 
@@ -49,7 +50,7 @@ body {
 .orb-1 {
     width: 400px;
     height: 400px;
-    background: rgba(255, 51, 68, 0.15);
+    background: rgba(75, 123, 255, 0.15);
     top: -100px;
     left: -100px;
 }
@@ -57,7 +58,7 @@ body {
 .orb-2 {
     width: 300px;
     height: 300px;
-    background: rgba(14, 165, 233, 0.1);
+    background: rgba(166, 209, 230, 0.1);
     bottom: -50px;
     right: -50px;
     animation-delay: 2s;
@@ -150,7 +151,7 @@ body {
 
 .nav-item.active {
     color: var(--text-main);
-    background: linear-gradient(90deg, rgba(255, 51, 68, 0.15) 0%, transparent 100%);
+    background: linear-gradient(90deg, rgba(75, 123, 255, 0.15) 0%, transparent 100%);
     border-left: 3px solid var(--primary);
 }
 
@@ -300,7 +301,7 @@ body {
 .orb-core {
     width: 100px;
     height: 100px;
-    background: radial-gradient(circle, var(--primary) 0%, rgba(255,51,68,0.2) 80%);
+    background: radial-gradient(circle, var(--primary) 0%, rgba(75,123,255,0.2) 80%);
     border-radius: 50%;
     box-shadow: 0 0 50px var(--primary-glow);
     z-index: 10;
@@ -325,7 +326,7 @@ body {
 
 .orb-ring {
     position: absolute;
-    border: 2px solid rgba(255, 51, 68, 0.2);
+    border: 2px solid rgba(75, 123, 255, 0.2);
     border-radius: 50%;
     inset: 0;
 }
@@ -433,7 +434,7 @@ body {
 }
 
 .message.user .msg-bubble {
-    background: rgba(14, 165, 233, 0.1);
+    background: rgba(166, 209, 230, 0.1);
     border-radius: 20px 0 20px 20px;
 }
 
@@ -525,7 +526,7 @@ body {
 }
 
 .badge.pending { background: rgba(245, 158, 11, 0.1); color: #f59e0b; }
-.badge.confirmed { background: rgba(16, 185, 129, 0.1); color: #10b981; }
+.badge.confirmed { background: rgba(74, 222, 128, 0.1); color: var(--accent-green); }
 
 
 @keyframes pulse {
@@ -611,7 +612,7 @@ body {
 }
 
 .cyber-toggle.active {
-    background: rgba(255, 51, 68, 0.2);
+    background: rgba(75, 123, 255, 0.2);
     border-color: var(--primary);
 }
 
@@ -690,7 +691,7 @@ body {
 }
 
 .persona-btn.active {
-    background: rgba(255, 51, 68, 0.15);
+    background: rgba(75, 123, 255, 0.15);
     border-color: var(--primary);
     color: var(--primary);
     box-shadow: 0 0 20px var(--primary-glow);
@@ -749,7 +750,7 @@ body {
 
 .mobile-nav-item.active {
     color: var(--primary);
-    background: rgba(255, 51, 68, 0.1);
+    background: rgba(75, 123, 255, 0.1);
 }
 
 /* --- Mobile Sidebar Overlay --- */
@@ -1207,7 +1208,7 @@ body {
 
 .cctv-placeholder i { font-size: 2rem; }
 
-.cctv-placeholder.offline { color: #ff334466; }
+.cctv-placeholder.offline { color: #ef444466; }
 
 .cctv-label {
     position: absolute;
@@ -1226,12 +1227,12 @@ body {
 .cctv-dot {
     width: 6px;
     height: 6px;
-    background: #10b981;
+    background: var(--accent-green);
     border-radius: 50%;
-    box-shadow: 0 0 8px #10b981;
+    box-shadow: 0 0 8px var(--accent-green);
 }
 
-.cctv-dot.offline { background: #ff3344; box-shadow: 0 0 8px #ff3344; }
+.cctv-dot.offline { background: #ef4444; box-shadow: 0 0 8px #ef4444; }
 
 .access-log {
     display: flex;
@@ -1416,7 +1417,7 @@ body {
 .input-group input:focus {
     border-color: var(--primary);
     background: rgba(255, 255, 255, 0.08);
-    box-shadow: 0 0 15px rgba(255, 51, 68, 0.1);
+    box-shadow: 0 0 15px rgba(75, 123, 255, 0.1);
 }
 
 .login-btn {
