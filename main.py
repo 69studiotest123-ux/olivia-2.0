@@ -19,6 +19,7 @@ from fastapi import Depends
 from database import get_db, ChatMessage
 from duckduckgo_search import DDGS
 import psutil
+from apscheduler.schedulers.background import BackgroundScheduler
 
 app = FastAPI(title="Olivia Elite Core")
 

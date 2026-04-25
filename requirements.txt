@@ -9,3 +9,6 @@ python-dotenv
 sqlalchemy
 psycopg2-binary
 firebase-admin
+apscheduler
+duckduckgo-search
+psutil
