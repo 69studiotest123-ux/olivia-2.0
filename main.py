@@ -1,6 +1,6 @@
 import os
 from datetime import datetime
-from fastapi import FastAPI, BackgroundTasks, Request, HTTPException
+from fastapi import FastAPI, BackgroundTasks, Request, HTTPException, UploadFile, File
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 import requests
