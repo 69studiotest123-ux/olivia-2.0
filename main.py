@@ -16,10 +16,14 @@ from langchain_openai import ChatOpenAI
 from langchain_google_genai import ChatGoogleGenerativeAI
 from sqlalchemy.orm import Session
 from fastapi import Depends
-from database import get_db, ChatMessage
+from database import get_db, ChatMessage, MarketPrice, UserPattern, BookingModel
 from duckduckgo_search import DDGS
 import psutil
 from apscheduler.schedulers.background import BackgroundScheduler
+
+class ChatRequest(BaseModel):
+    prompt: str
+    model_type: str = "gemini"
 
 app = FastAPI(title="Olivia Elite Core")
 
