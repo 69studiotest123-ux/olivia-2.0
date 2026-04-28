@@ -1,6 +1,13 @@
 // --- Global Functions for HTML calls ---
 const CORRECT_KEY = "69studio"; // Modern Elite Access Key
 
+// Dynamic API Base Detection (Global)
+const API_BASE = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || !window.location.hostname) 
+    ? "http://localhost:8000" 
+    : `http://${window.location.hostname}:8000`;
+
+console.log("Olivia 2.0 System Online. API Base:", API_BASE);
+
 window.triggerAction = async function(action) {
     console.log("Triggering Action:", action);
     const aiOrb = document.getElementById('aiOrb');
@@ -8,15 +15,6 @@ window.triggerAction = async function(action) {
     
     if (aiOrb) aiOrb.classList.add('speaking-anim');
     if (statusText) statusText.innerText = "Initializing " + action.replace('_', ' ') + "...";
-
-    // Call chat with the command
-    try {
-    // Dynamic API Base Detection
-    const API_BASE = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || !window.location.hostname) 
-        ? "http://localhost:8000" 
-        : `http://${window.location.hostname}:8000`;
-    
-    console.log("Using API Base:", API_BASE);
 
     // Call chat with the command
     try {
@@ -28,9 +26,8 @@ window.triggerAction = async function(action) {
         const data = await response.json();
         // Move to Comms view to see the response
         window.appSwitchView('chat');
-        // The message will be added by the chat logic if we can hook it
-        // For now, just alert or add a manual message
         if (window.addChatMessage) window.addChatMessage(data.response, 'bot');
+        if (window.speakResponse) window.speakResponse(data.response);
     } catch (e) {
         console.error("Action error:", e);
     } finally {
@@ -75,8 +72,8 @@ function handleLogin() {
                 document.getElementById('mobileTopBar').style.display = 'flex';
                 document.getElementById('globalMicBtn').style.display = 'grid';
                 
-                // Load sync'd chat
-                if (typeof loadChatHistory === 'function') loadChatHistory();
+                // Trigger initial AI greeting
+                console.log("System Initialized.");
                 
                 setTimeout(() => {
                     document.getElementById('loginScreen').style.display = 'none';
@@ -85,9 +82,6 @@ function handleLogin() {
             
             // Persist session
             localStorage.setItem('olivia_auth', 'true');
-            
-            // Trigger initial AI greeting
-            console.log("System Initialized.");
         }, 1000);
     } else {
         btnText.innerText = "Invalid Key";
@@ -107,19 +101,14 @@ function switchToView(target) {
     }
 }
 
-async function triggerAction(actionName) {
-    console.log(`Triggering action: ${actionName}`);
-    try {
-        await fetch(`${API_BASE}/control/scene/${actionName}`);
-    } catch(e) {
-        console.warn("Failed to send command to backend.");
-    }
-}
-
 document.addEventListener('DOMContentLoaded', () => {
-    console.log("Olivia 2.0 System Initializing...");
+    console.log("Olivia 2.0 Dashboard Initializing...");
 
-    // --- Check Auth ---
+    const chatMessages = document.getElementById('chatMessages');
+    const chatInput = document.getElementById('chatInput');
+    const chatSendBtn = document.getElementById('chatSendBtn');
+
+    // --- Load History ---
     async function loadChatHistory() {
         if (!chatMessages) return;
         try {
@@ -144,7 +133,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (globalMicBtn) globalMicBtn.style.display = 'grid';
         
         document.getElementById('mobileTopBar').style.display = 'flex';
-        loadChatHistory(); // Load sync'd chat
+        loadChatHistory(); 
     }
     
     // --- Navigation Elements ---
@@ -154,46 +143,36 @@ document.addEventListener('DOMContentLoaded', () => {
     const sidebar = document.querySelector('.sidebar');
     const sidebarOverlay = document.getElementById('sidebarOverlay');
 
-    // --- View Switching Core ---
     window.appSwitchView = (target) => {
         console.log(`Switching to view: ${target}`);
-        // Deactivate all
         views.forEach(v => v.classList.remove('active'));
         navItems.forEach(n => n.classList.remove('active'));
         mobileNavItems.forEach(n => n.classList.remove('active'));
 
-        // Activate target
         const targetView = document.getElementById(`${target}-view`);
-        if (targetView) {
-            targetView.classList.add('active');
-        } else {
-            console.warn(`View ID ${target}-view not found.`);
-        }
+        if (targetView) targetView.classList.add('active');
 
-        // Sync Sidebar
         navItems.forEach(n => {
             if (n.getAttribute('data-target') === target) n.classList.add('active');
         });
 
-        // Sync Mobile Nav
         const activeMobileItem = Array.from(mobileNavItems).find(n => n.getAttribute('data-target') === target);
         if (activeMobileItem) {
             activeMobileItem.classList.add('active');
-            activeMobileItem.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
         }
 
-        // Mobile specific: Close sidebar if open
         if (sidebar && sidebar.classList.contains('mobile-open')) {
             sidebar.classList.remove('mobile-open');
-            if (sidebarOverlay) sidebarOverlay.classList.remove('open');
+            if (sidebarOverlay) {
+                sidebarOverlay.classList.remove('open');
+                sidebarOverlay.style.display = 'none';
+            }
         }
     };
 
-    // Attach listeners to Sidebar (Fallback for desktop clicking)
     navItems.forEach(item => {
         item.addEventListener('click', () => {
-            const target = item.getAttribute('data-target');
-            window.appSwitchView(target);
+            window.appSwitchView(item.getAttribute('data-target'));
         });
     });
 
@@ -202,7 +181,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const todayDateEl = document.getElementById('todayDate');
     const now = new Date();
     
-    // Greeting
     const hour = now.getHours();
     if (timeGreeting) {
         if (hour < 12) timeGreeting.innerText = "Good Morning, Sir.";
@@ -210,7 +188,6 @@ document.addEventListener('DOMContentLoaded', () => {
         else timeGreeting.innerText = "Good Evening, Sir.";
     }
 
-    // Schedule Date
     if (todayDateEl) {
         const options = { weekday: 'long', month: 'long', day: 'numeric' };
         todayDateEl.innerText = now.toLocaleDateString('en-US', options);
@@ -218,7 +195,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- Mobile Sidebar Toggle ---
     const mobileSidebarBtn = document.getElementById('mobileSidebarBtn');
-
     if (mobileSidebarBtn && sidebar) {
         mobileSidebarBtn.addEventListener('click', () => {
             sidebar.classList.add('mobile-open');
@@ -237,10 +213,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // --- Chat Logic ---
-    const chatInput = document.getElementById('chatInput');
-    const chatSendBtn = document.getElementById('chatSendBtn');
-    const chatMessages = document.getElementById('chatMessages');
-
     async function sendMessage() {
         if (!chatInput) return;
         const text = chatInput.value.trim();
@@ -264,10 +236,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const data = await response.json();
             const botText = data.response || "Error getting response";
             addMessage(botText, 'bot');
-            
-            // Speak the response aloud
             if (window.speakResponse) window.speakResponse(botText);
-            
         } catch (error) {
             console.error("Backend error:", error);
             addMessage("Sir, I cannot reach the main server at the moment.", 'bot');
@@ -287,17 +256,12 @@ document.addEventListener('DOMContentLoaded', () => {
         chatMessages.scrollTop = chatMessages.scrollHeight;
     }
     
-    // Expose globally
     window.addChatMessage = addMessage;
 
     if (chatSendBtn && chatInput) {
         chatSendBtn.addEventListener('click', sendMessage);
         chatInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') sendMessage(); });
     }
-
-    // --- Global Mic Button ---
-    const globalMicBtn = document.getElementById('globalMicBtn');
-    const aiOrb = document.getElementById('aiOrb');
 
     // --- Voice AI Engine ---
     let recognition;
@@ -310,27 +274,21 @@ document.addEventListener('DOMContentLoaded', () => {
 
         recognition.onresult = (event) => {
             const transcript = event.results[0][0].transcript;
-            console.log("Speech recognized:", transcript);
             if (chatInput) {
                 chatInput.value = transcript;
-                sendMessage(); // Auto-send recognized text
+                sendMessage(); 
             }
         };
 
-        recognition.onend = () => {
-            stopListeningUI();
-        };
-
-        recognition.onerror = (event) => {
-            console.error("Speech error:", event.error);
-            stopListeningUI();
-        };
+        recognition.onend = () => { stopListeningUI(); };
+        recognition.onerror = () => { stopListeningUI(); };
     }
 
     function startListeningUI() {
         const statusText = document.querySelector('.ai-status-text');
         if (aiOrb) aiOrb.classList.add('speaking-anim');
         if (statusText) statusText.innerText = "Listening...";
+        const globalMicBtn = document.getElementById('globalMicBtn');
         if (globalMicBtn) globalMicBtn.classList.add('active');
     }
 
@@ -338,14 +296,12 @@ document.addEventListener('DOMContentLoaded', () => {
         const statusText = document.querySelector('.ai-status-text');
         if (aiOrb) aiOrb.classList.remove('speaking-anim');
         if (statusText) statusText.innerText = "Standby";
+        const globalMicBtn = document.getElementById('globalMicBtn');
         if (globalMicBtn) globalMicBtn.classList.remove('active');
     }
 
-    // Text-to-Speech Response
     window.speakResponse = async function(text) {
         console.log("Olivia Speaking:", text);
-        
-        // 1. Try ElevenLabs via Backend
         try {
             const response = await fetch(`${API_BASE}/olivia/generate-voice`, {
                 method: "POST",
@@ -364,19 +320,17 @@ document.addEventListener('DOMContentLoaded', () => {
             console.warn("ElevenLabs failed, falling back to native TTS:", e);
         }
 
-        // 2. Fallback to Native Speech Synthesis
         if (!('speechSynthesis' in window)) return;
         window.speechSynthesis.cancel();
         const utterance = new SpeechSynthesisUtterance(text);
         utterance.lang = 'en-US';
-        utterance.rate = 1.0;
-        utterance.pitch = 1.1;
         const voices = window.speechSynthesis.getVoices();
         const preferredVoice = voices.find(v => v.name.includes('Google UK English Female') || v.name.includes('Samantha'));
         if (preferredVoice) utterance.voice = preferredVoice;
         window.speechSynthesis.speak(utterance);
     };
 
+    const globalMicBtn = document.getElementById('globalMicBtn');
     if (globalMicBtn) {
         globalMicBtn.addEventListener('click', () => {
             if (aiOrb && aiOrb.classList.contains('speaking-anim')) {
@@ -387,51 +341,15 @@ document.addEventListener('DOMContentLoaded', () => {
                     try {
                         recognition.start();
                         startListeningUI();
-                    } catch (e) {
-                        console.error("Mic start error:", e);
-                    }
+                    } catch (e) { console.error(e); }
                 } else {
-                    alert("Speech recognition not supported in this browser.");
+                    alert("Speech recognition not supported.");
                 }
             }
         });
     }
 
-    // --- ADVANCED GEOFENCING ---
-    const HOME_LOCATIONS = {
-        dubai: { lat: 25.2048, lon: 55.2708, radius: 500 }, // Example Dubai coords
-        sl: { lat: 6.9271, lon: 79.8612, radius: 500 }      // Example SL coords
-    };
-
-    function checkGeofencing(pos) {
-        const { latitude, longitude } = pos.coords;
-        for (const [name, loc] of Object.entries(HOME_LOCATIONS)) {
-            const dist = calculateDistance(latitude, longitude, loc.lat, loc.lon);
-            if (dist < loc.radius) {
-                console.log(`Arrived at ${name}! Triggering welcome scene...`);
-                window.triggerAction(`arrived_${name}`);
-            }
-        }
-    }
-
-    function calculateDistance(lat1, lon1, lat2, lon2) {
-        const R = 6371e3; // metres
-        const φ1 = lat1 * Math.PI/180;
-        const φ2 = lat2 * Math.PI/180;
-        const Δφ = (lat2-lat1) * Math.PI/180;
-        const Δλ = (lon2-lon1) * Math.PI/180;
-        const a = Math.sin(Δφ/2) * Math.sin(Δφ/2) +
-                  Math.cos(φ1) * Math.cos(φ2) *
-                  Math.sin(Δλ/2) * Math.sin(Δλ/2);
-        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-        return R * c;
-    }
-
-    if ("geolocation" in navigator) {
-        navigator.geolocation.watchPosition(checkGeofencing);
-    }
-
-    // --- WAKE WORD DETECTION (Hey Olivia) ---
+    // --- Wake Word Detection (Hey Olivia) ---
     let isWakeWordActive = false;
     function initWakeWord() {
         if (!('webkitSpeechRecognition' in window)) return;
@@ -441,36 +359,23 @@ document.addEventListener('DOMContentLoaded', () => {
         wakeWordRecognition.lang = 'en-US';
 
         wakeWordRecognition.onresult = (event) => {
-            const transcript = Array.from(event.results)
-                .map(result => result[0])
-                .map(result => result.transcript)
-                .join('').toLowerCase();
-
+            const transcript = Array.from(event.results).map(r => r[0].transcript).join('').toLowerCase();
             if (transcript.includes('hey olivia') || transcript.includes('olivia')) {
-                console.log("Wake word detected!");
-                wakeWordRecognition.stop(); // Stop wake listener
-                globalMicBtn.click(); // Trigger main mic
+                wakeWordRecognition.stop(); 
+                if (globalMicBtn) globalMicBtn.click(); 
             }
         };
 
-        wakeWordRecognition.onend = () => {
-            if (!isWakeWordActive) wakeWordRecognition.start();
-        };
-
+        wakeWordRecognition.onend = () => { if (!isWakeWordActive) wakeWordRecognition.start(); };
         wakeWordRecognition.start();
     }
     
-    // Start wake word after first user interaction (browser requirement)
     document.addEventListener('click', () => {
-        if (!isWakeWordActive) {
-            initWakeWord();
-            isWakeWordActive = true;
-        }
+        if (!isWakeWordActive) { initWakeWord(); isWakeWordActive = true; }
     }, { once: true });
 
     // --- IP CAMERA INTEGRATION ---
     let cameraMode = 'img';
-
     window.setCamMode = (mode) => {
         cameraMode = mode;
         document.getElementById('camModeImg').classList.toggle('active', mode === 'img');
@@ -493,7 +398,6 @@ document.addEventListener('DOMContentLoaded', () => {
         if (ipInput) {
             feedBox.style.display = 'block';
             errorMsg.style.display = 'none';
-            
             if (cameraMode === 'img') {
                 liveFeed.src = ipInput;
                 liveFeed.style.display = 'block';
@@ -503,12 +407,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 liveFrame.style.display = 'block';
                 liveFeed.style.display = 'none';
             }
-            
             window.speakResponse("Syncing with remote visual sensor.");
-        } else {
-            alert("Please enter a valid Camera IP URL.");
         }
     };
-
-    console.log("Olivia 2.0 System Online.");
 });
