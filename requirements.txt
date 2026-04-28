@@ -13,3 +13,4 @@ apscheduler
 duckduckgo-search
 psutil
 python-multipart
+elevenlabs

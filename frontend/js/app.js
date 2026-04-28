@@ -333,26 +333,38 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // Text-to-Speech Response
-    window.speakResponse = function(text) {
+    window.speakResponse = async function(text) {
+        console.log("Olivia Speaking:", text);
+        
+        // 1. Try ElevenLabs via Backend
+        try {
+            const response = await fetch("http://84.235.242.22:8000/olivia/generate-voice", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ text: text })
+            });
+
+            if (response.ok) {
+                const blob = await response.blob();
+                const url = URL.createObjectURL(blob);
+                const audio = new Audio(url);
+                audio.play();
+                return;
+            }
+        } catch (e) {
+            console.warn("ElevenLabs failed, falling back to native TTS:", e);
+        }
+
+        // 2. Fallback to Native Speech Synthesis
         if (!('speechSynthesis' in window)) return;
-        
-        // Stop any current speaking
         window.speechSynthesis.cancel();
-        
         const utterance = new SpeechSynthesisUtterance(text);
         utterance.lang = 'en-US';
         utterance.rate = 1.0;
-        utterance.pitch = 1.1; // Slightly higher for more female tone
-        
-        // Try to find a premium female voice
+        utterance.pitch = 1.1;
         const voices = window.speechSynthesis.getVoices();
-        const preferredVoice = voices.find(v => 
-            v.name.includes('Google UK English Female') || 
-            v.name.includes('Samantha') || 
-            v.name.includes('Female')
-        );
+        const preferredVoice = voices.find(v => v.name.includes('Google UK English Female') || v.name.includes('Samantha'));
         if (preferredVoice) utterance.voice = preferredVoice;
-
         window.speechSynthesis.speak(utterance);
     };
 

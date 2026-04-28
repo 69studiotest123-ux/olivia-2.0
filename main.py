@@ -20,6 +20,9 @@ from database import get_db, ChatMessage, MarketPrice, UserPattern, BookingModel
 from duckduckgo_search import DDGS
 import psutil
 from apscheduler.schedulers.background import BackgroundScheduler
+from elevenlabs.client import ElevenLabs
+from fastapi.responses import StreamingResponse
+import io
 
 class ChatRequest(BaseModel):
     prompt: str
@@ -96,22 +99,7 @@ scheduler.add_job(scan_market_prices, 'interval', hours=6) # Scan every 6 hours
 scheduler.add_job(check_server_health, 'interval', minutes=30) # Monitor every 30 mins
 scheduler.start()
 
-# --- 2. THE DESIGNER'S EYE (VISION CRITIQUE) ---
-@app.post("/vision/analyze")
-async def analyze_design(file: UploadFile = File(...)):
-    try:
-        contents = await file.read()
-        llm = get_gemini_model()
-        prompt_text = "Act as a Senior Creative Director. Critique Subhash's design for balance, typography, and luxury feel."
-        image_part = {
-            "type": "image_url",
-            "image_url": {"url": f"data:image/jpeg;base64,{base64.b64encode(contents).decode()}"},
-        }
-        message = HumanMessage(content=[{"type": "text", "text": prompt_text}, image_part])
-        response = llm.invoke([message]).content
-        return {"response": response}
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+
 
 # --- 3. PATTERN LEARNING LOGIC ---
 def learn_user_pattern(text, db: Session):
@@ -121,10 +109,7 @@ def learn_user_pattern(text, db: Session):
         db.add(p)
         db.commit()
 
-@app.post("/chat")
-async def chat_endpoint(request: ChatRequest, db: Session = Depends(get_db)):
-    # ... previous logic ...
-    learn_user_pattern(request.prompt, db)
+
 
 # --- 3. AUTO-EXPENSE TRACKER ---
 def check_for_expenses(text, db: Session):
@@ -344,10 +329,28 @@ class VoiceRequest(BaseModel):
     text: str
 
 @app.post("/olivia/generate-voice")
-def text_to_voice(request: VoiceRequest):
-    # Connect to ElevenLabs API
-    # Return audio stream to HomePod or PWA
-    return {"status": "Voice generated for", "text": request.text}
+async def text_to_voice(request: VoiceRequest):
+    api_key = os.getenv("ELEVENLABS_API_KEY")
+    voice_id = os.getenv("ELEVENLABS_VOICE_ID", "EXAVITQu4vr4xnSDxMaL") # Default: Bella
+
+    if not api_key or "your_" in api_key:
+        raise HTTPException(status_code=400, detail="ElevenLabs API Key not configured.")
+
+    try:
+        client = ElevenLabs(api_key=api_key)
+        audio_gen = client.generate(
+            text=request.text,
+            voice=voice_id,
+            model="eleven_multilingual_v2"
+        )
+        
+        # Convert generator to bytes
+        audio_bytes = b"".join(list(audio_gen))
+        
+        return StreamingResponse(io.BytesIO(audio_bytes), media_type="audio/mpeg")
+    except Exception as e:
+        print(f"ElevenLabs Error: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
 
 if __name__ == "__main__":
     import uvicorn
