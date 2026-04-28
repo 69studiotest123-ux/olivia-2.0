@@ -17,7 +17,7 @@ from langchain_google_genai import ChatGoogleGenerativeAI
 from sqlalchemy.orm import Session
 from fastapi import Depends
 from database import get_db, ChatMessage, MarketPrice, UserPattern, BookingModel
-from duckduckgo_search import DDGS
+from ddgs import DDGS
 import psutil
 from apscheduler.schedulers.background import BackgroundScheduler
 from elevenlabs.client import ElevenLabs

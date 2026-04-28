@@ -11,7 +11,16 @@ window.triggerAction = async function(action) {
 
     // Call chat with the command
     try {
-        const response = await fetch("http://84.235.242.22:8000/chat", {
+    // Dynamic API Base Detection
+    const API_BASE = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || !window.location.hostname) 
+        ? "http://localhost:8000" 
+        : `http://${window.location.hostname}:8000`;
+    
+    console.log("Using API Base:", API_BASE);
+
+    // Call chat with the command
+    try {
+        const response = await fetch(`${API_BASE}/chat`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ prompt: `[SYSTEM_COMMAND] Trigger action: ${action}`, model_type: "gemini" })
@@ -40,7 +49,7 @@ window.toggleAutomation = async function(device, el) {
     console.log(`Toggling ${device} to ${newState ? 'ON' : 'OFF'}`);
     
     try {
-        await fetch("http://84.235.242.22:8000/chat", {
+        await fetch(`${API_BASE}/chat`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ prompt: `[SYSTEM_COMMAND] ${device} set to ${newState ? 'ON' : 'OFF'}`, model_type: "gemini" })
@@ -101,7 +110,7 @@ function switchToView(target) {
 async function triggerAction(actionName) {
     console.log(`Triggering action: ${actionName}`);
     try {
-        await fetch(`http://84.235.242.22:8000/control/scene/${actionName}`);
+        await fetch(`${API_BASE}/control/scene/${actionName}`);
     } catch(e) {
         console.warn("Failed to send command to backend.");
     }
@@ -114,7 +123,7 @@ document.addEventListener('DOMContentLoaded', () => {
     async function loadChatHistory() {
         if (!chatMessages) return;
         try {
-            const response = await fetch("http://84.235.242.22:8000/chat/history");
+            const response = await fetch(`${API_BASE}/chat/history`);
             const history = await response.json();
             chatMessages.innerHTML = ''; // Clear existing
             history.forEach(msg => {
@@ -247,7 +256,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (statusText) statusText.innerText = "Processing...";
 
         try {
-            const response = await fetch("http://84.235.242.22:8000/chat", {
+            const response = await fetch(`${API_BASE}/chat`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ prompt: text, model_type: "gemini" })
@@ -338,7 +347,7 @@ document.addEventListener('DOMContentLoaded', () => {
         
         // 1. Try ElevenLabs via Backend
         try {
-            const response = await fetch("http://84.235.242.22:8000/olivia/generate-voice", {
+            const response = await fetch(`${API_BASE}/olivia/generate-voice`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ text: text })
@@ -460,15 +469,42 @@ document.addEventListener('DOMContentLoaded', () => {
     }, { once: true });
 
     // --- IP CAMERA INTEGRATION ---
+    let cameraMode = 'img';
+
+    window.setCamMode = (mode) => {
+        cameraMode = mode;
+        document.getElementById('camModeImg').classList.toggle('active', mode === 'img');
+        document.getElementById('camModeWeb').classList.toggle('active', mode === 'web');
+        window.connectCamera();
+    };
+
+    window.onCamError = () => {
+        document.getElementById('camErrorMessage').style.display = 'block';
+        document.getElementById('liveCameraFeed').style.display = 'none';
+    };
+
     window.connectCamera = () => {
         const ipInput = document.getElementById('cameraIpInput').value;
         const feedBox = document.getElementById('cameraFeedBox');
         const liveFeed = document.getElementById('liveCameraFeed');
+        const liveFrame = document.getElementById('liveCameraFrame');
+        const errorMsg = document.getElementById('camErrorMessage');
         
         if (ipInput) {
-            liveFeed.src = ipInput;
             feedBox.style.display = 'block';
-            window.speakResponse("Connecting to remote camera feed sir.");
+            errorMsg.style.display = 'none';
+            
+            if (cameraMode === 'img') {
+                liveFeed.src = ipInput;
+                liveFeed.style.display = 'block';
+                liveFrame.style.display = 'none';
+            } else {
+                liveFrame.src = ipInput;
+                liveFrame.style.display = 'block';
+                liveFeed.style.display = 'none';
+            }
+            
+            window.speakResponse("Syncing with remote visual sensor.");
         } else {
             alert("Please enter a valid Camera IP URL.");
         }

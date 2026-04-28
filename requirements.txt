@@ -10,7 +10,7 @@ sqlalchemy
 psycopg2-binary
 firebase-admin
 apscheduler
-duckduckgo-search
+ddgs
 psutil
 python-multipart
 elevenlabs

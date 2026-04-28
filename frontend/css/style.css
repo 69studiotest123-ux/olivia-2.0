@@ -1561,6 +1561,20 @@ body {
         padding: 20px 20px 10px 20px !important;
     }
 }
+.btn-xs {
+    padding: 4px 10px;
+    font-size: 0.7rem;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid var(--glass-border);
+    color: var(--text-muted);
+    border-radius: 6px;
+    cursor: pointer;
+}
+.btn-xs.active {
+    background: var(--primary);
+    color: white;
+    border-color: var(--primary);
+}
 .camera-feed-container {
     width: 100%;
     height: 200px;
